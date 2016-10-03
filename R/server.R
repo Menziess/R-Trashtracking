@@ -7,13 +7,16 @@
 
 source('require.R')
 
+trash <- read.csv('../Data/output.csv')
+trash <- head(trash, 10)
+
 r_colors <- rgb(t(col2rgb(colors()) / 255))
 names(r_colors) <- colors()
 
 shinyServer(function(input, output) {
 
   points <- eventReactive(input$recalc, {
-    cbind(rnorm(40) * 2 + 13, rnorm(40) + 48)
+    cbind(trash$longitude, trash$latitude)
   }, ignoreNULL = FALSE)
   
   output$mymap <- renderLeaflet({

@@ -6,6 +6,7 @@
 #
 
 library(shiny)
+library(leaflet)
 
 shinyUI(fluidPage(
   leafletOutput("mymap"),
