@@ -6,6 +6,7 @@
 #
 
 trash <- read.csv('../Data/output.csv')
+trash <- filter(trash, latitude != 0 & latitude != 1 & longitude != 0 & longitude != 1)
 
 r_colors <- rgb(t(col2rgb(colors()) / 255))
 names(r_colors) <- colors()
