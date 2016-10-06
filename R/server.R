@@ -6,10 +6,11 @@
 #
 
 trash <- read.csv('../Data/output.csv')
-trash <- head(trash, 10)
 
 r_colors <- rgb(t(col2rgb(colors()) / 255))
 names(r_colors) <- colors()
+
+# Clustering and externalAPI logic should be static methods assuming a trash data set
 
 shinyServer(function(input, output) {
 
@@ -18,11 +19,11 @@ shinyServer(function(input, output) {
   }, ignoreNULL = FALSE)
   
   output$mymap <- renderLeaflet({
-    leaflet() %>%
+    leaflet() %>% 
       addProviderTiles("Stamen.TonerLite",
                        options = providerTileOptions(noWrap = TRUE)
       ) %>%
-      addMarkers(data = points())
+      addMarkers(clusterOptions = markerClusterOptions(), data = points())
   })
 
 })
