@@ -8,7 +8,5 @@
 source('require.R')
 
 shinyUI(fluidPage(
-  leafletOutput("mymap"),
-  p(),
-  actionButton("recalc", "Redraw")
+  leafletOutput("mymap")
 ))

@@ -5,13 +5,14 @@
 # http://shiny.rstudio.com
 #
 
+source('externalAPI.R')
+
 trash <- read.csv('../Data/output.csv')
 trash <- filter(trash, latitude != 0 & latitude != 1 & longitude != 0 & longitude != 1)
 
-r_colors <- rgb(t(col2rgb(colors()) / 255))
-names(r_colors) <- colors()
-
-# Clustering and externalAPI logic should be static methods assuming a trash data set
+  ## EXAMPLE GOOGLE REQUEST
+  #test <- head(trash, 1)
+  #googleData <- googlePlaces(test$latitude, test$longitude, radius = 500, types = NULL, name = NULL)
 
 shinyServer(function(input, output) {
 
@@ -26,5 +27,4 @@ shinyServer(function(input, output) {
       ) %>%
       addMarkers(clusterOptions = markerClusterOptions(), data = points())
   })
-
 })
