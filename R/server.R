@@ -5,8 +5,6 @@
 # http://shiny.rstudio.com
 #
 
-source('require.R')
-
 trash <- read.csv('../Data/output.csv')
 trash <- head(trash, 10)
 

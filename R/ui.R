@@ -5,8 +5,7 @@
 # http://shiny.rstudio.com
 #
 
-library(shiny)
-library(leaflet)
+source('require.R')
 
 shinyUI(fluidPage(
   leafletOutput("mymap"),
