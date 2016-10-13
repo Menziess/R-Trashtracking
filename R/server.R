@@ -19,12 +19,20 @@ shinyServer(function(input, output) {
   points <- eventReactive(input$recalc, {
     cbind(trash$longitude, trash$latitude)
   }, ignoreNULL = FALSE)
-  
-  output$mymap <- renderLeaflet({
+
+  output$map <- renderLeaflet({
     leaflet() %>% 
       addProviderTiles("Stamen.TonerLite",
                        options = providerTileOptions(noWrap = TRUE)
       ) %>%
       addMarkers(clusterOptions = markerClusterOptions(), data = points())
+  })
+  
+  observe({
+    click<-input$map_marker_click
+    if(is.null(click))
+      return()
+
+    output$text <- renderText(paste("Lattitude ", click$lat, "Longtitude ", click$lng))
   })
 })
