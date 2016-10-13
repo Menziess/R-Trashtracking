@@ -8,5 +8,6 @@
 source('require.R')
 
 shinyUI(fluidPage(
-  leafletOutput("mymap")
+  leafletOutput("map"),
+  h3(textOutput("text"))
 ))
