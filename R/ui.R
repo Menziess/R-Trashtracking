@@ -23,7 +23,7 @@ shinyUI(navbarPage("Trashtracking",
       absolutePanel(class = "panel panel-primary", bottom = -150, right = -40, draggable = T,
         div(class = "panel-heading", "Controls"),
         div(class = "panel-body",
-          selectInput("type", NULL, choices = c("cola")),
+          selectInput("type", NULL, choices = c("All", unlist(types))),
           
           # Feedback developer text
           textOutput("text")
