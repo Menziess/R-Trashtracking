@@ -23,7 +23,8 @@ shinyServer(function(input, output) {
   }, ignoreNULL = FALSE)
 
   output$map <- renderLeaflet({
-    leaflet() %>% 
+    leaflet() %>%
+      setView(5, 52, 7) %>%
       addProviderTiles("Stamen.TonerLite", 
         options = providerTileOptions(noWrap = TRUE)
       ) %>%
@@ -45,9 +46,9 @@ shinyServer(function(input, output) {
   })
   
   observe({
-    click <- input$clusterclick
+    click <- input$map_click
     if(is.null(click))
       return()
-    output$text <- renderText(click)
+    output$text <- renderText(paste(click$lat, " ", click$lng))
   })
 })
