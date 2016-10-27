@@ -13,5 +13,13 @@ googlePlaces <- function(latitude = 0, longitude = 0, radius = 100, types = NULL
   return (content(r, "parsed"))
 }
 
+extractInformation <- function(response = NULL) {
+  if (is.null(response))
+    return()
+  return (c(
+    paste('count:', length(response$results))
+  ))
+}
+
 # Other API
 #
