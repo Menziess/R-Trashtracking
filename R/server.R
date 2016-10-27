@@ -13,7 +13,7 @@ trash <- filter(trash, latitude != 0 & latitude != 1 & longitude != 0 & longitud
 types <- distinct(trash, type)
 
 shinyServer(function(input, output) {
-
+  
   ##
   # Rendered points
   
@@ -69,5 +69,10 @@ shinyServer(function(input, output) {
     if(is.null(e))
       return()
     output$text <- renderText(paste("Zoom: ", e))
+  })
+  
+  # Button press should show graphs and additional information
+  observeEvent(input$showGraphs, {
+    output$text <- renderText('Button pressed: yes')
   })
 })

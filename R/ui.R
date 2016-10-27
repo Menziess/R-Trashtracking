@@ -24,6 +24,7 @@ shinyUI(navbarPage("Trashtracking",
         div(class = "panel-heading", "Controls"),
         div(class = "panel-body",
           selectInput("type", NULL, choices = c("All")),
+          actionButton("showGraphs", "Show Graphs"),
           
           # Feedback developer text
           textOutput("text")
