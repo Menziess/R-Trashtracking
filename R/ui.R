@@ -32,5 +32,7 @@ shinyUI(navbarPage("Trashtracking",
         div(class = "panel-footer", "Footer")
       )
     )
+  ),
+  tabPanel("Search"
   )
 ))
