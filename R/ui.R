@@ -27,7 +27,7 @@ shinyUI(navbarPage("Trashtracking",
           actionButton("showGraphs", "Show Graphs")
         ),
         div(class = "panel-footer", 
-          # Feedback developer text
+          # Feedback for the user
           textOutput("text")
         )
       )

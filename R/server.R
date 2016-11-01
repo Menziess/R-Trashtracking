@@ -40,7 +40,6 @@ shinyServer(function(input, output) {
   # Possible objects: marker, map, shape
   # Possible events:  click, mouseover, mouseout, bounds, zoom
 
-  # Map zoom event
   observe({
     e <- input$map_zoom
     if(is.null(e))
@@ -48,7 +47,6 @@ shinyServer(function(input, output) {
     output$text <- renderText(paste("Zoom: ", e))
   })
   
-  # Should output usefull information about the information and trash at that location
   observe({
     click <- input$map_click
     if(is.null(click))
@@ -58,7 +56,6 @@ shinyServer(function(input, output) {
     output$text <- renderText(paste("Google Places: ", length(places$results)))
   })
   
-  # Should show information about the trash
   observe({
     click <- input$map_marker_click
     if(is.null(click))
@@ -66,7 +63,6 @@ shinyServer(function(input, output) {
     output$text <- renderText(paste("Marker: Lat ", click$lat, "Lng ", click$lng))
   })
   
-  # Button press should show graphs and additional information
   observeEvent(input$showGraphs, {
     output$text <- renderText('Button pressed: yes')
   })
