@@ -15,17 +15,10 @@ types <- distinct(trash, type)
 shinyServer(function(input, output) {
   
   ##
-  # Rendered points
-  
-  points <- eventReactive(input$recalc, {
-    cbind(trash$longitude, trash$latitude)
-  }, ignoreNULL = FALSE)
-  
-  ##
   # Leaflet map
 
   output$map <- renderLeaflet({
-    leaflet() %>%
+    leaflet(trash) %>%
       setView(5, 52, 7) %>%
       addProviderTiles("Stamen.TonerLite", 
         options = providerTileOptions(
@@ -34,7 +27,7 @@ shinyServer(function(input, output) {
           minZoom = 1
         )
       ) %>%
-      addMarkers(clusterOptions = markerClusterOptions(), data = points())
+      addMarkers(clusterOptions = markerClusterOptions())
   })
   
   ##
@@ -44,26 +37,7 @@ shinyServer(function(input, output) {
   # Possible objects: marker, map, shape
   # Possible events:  click, mouseover, mouseout, bounds, zoom
 
-  # Should show a popover with detailed information
-  observe({
-    click <- input$map_marker_click
-    if(is.null(click))
-      return()
-    output$text <- renderText(paste("Marker: Lattitude ", click$lat, "Longtitude ", click$lng))
-  })
-  
-  # Should show all possible information related to this location using API?
-  # EXAMPLE GOOGLE REQUEST
-  #test <- head(trash, 1)
-  #googleData <- googlePlaces(test$latitude, test$longitude, radius = 500, types = NULL, name = NULL)
-  observe({
-    click <- input$map_click
-    if(is.null(click))
-      return()
-    output$text <- renderText(paste("Map: Lattitude ", click$lat, "Longtitude ", click$lng))
-  })
-  
-  # Should show relevant info at zoom level
+  # Should determine wether location is accurate enough to request google places information
   observe({
     e <- input$map_zoom
     if(is.null(e))
@@ -71,8 +45,29 @@ shinyServer(function(input, output) {
     output$text <- renderText(paste("Zoom: ", e))
   })
   
+  # Should output usefull information about the information and trash at that location
+  observe({
+    click <- input$map_click
+    if(is.null(click))
+      return()
+    output$text <- renderText(paste("Map: Lattitude ", click$lat, "Longtitude ", click$lng))
+  })
+  
+  # Should show information about the trash
+  observe({
+    click <- input$map_marker_click
+    if(is.null(click))
+      return()
+    output$text <- renderText(paste("Marker: Lattitude ", click$lat, "Longtitude ", click$lng))
+  })
+  
   # Button press should show graphs and additional information
   observeEvent(input$showGraphs, {
     output$text <- renderText('Button pressed: yes')
   })
 })
+
+
+#nearby <- nearbySearch(52.743, 5.221, 1000)
+#text <- textSearch(52.743, 5.221, 1000)
+#radar <- radarSearch(52.743, 5.221, 1000, type = 'food')
