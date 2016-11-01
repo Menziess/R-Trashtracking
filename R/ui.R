@@ -24,12 +24,12 @@ shinyUI(navbarPage("Trashtracking",
         div(class = "panel-heading", "Controls"),
         div(class = "panel-body",
           selectInput("type", NULL, choices = c("All")),
-          actionButton("showGraphs", "Show Graphs"),
-          
+          actionButton("showGraphs", "Show Graphs")
+        ),
+        div(class = "panel-footer", 
           # Feedback developer text
           textOutput("text")
-        ),
-        div(class = "panel-footer", "Footer")
+        )
       )
     )
   ),

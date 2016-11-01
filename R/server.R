@@ -8,7 +8,7 @@
 
 source('externalAPI.R')
 
-trash <- read.csv('../Data/output.csv')
+trash <- read.csv('../Data/output.csv') 
 trash <- filter(trash, latitude != 0 & latitude != 1 & longitude != 0 & longitude != 1)
 types <- distinct(trash, type)
 
@@ -27,7 +27,10 @@ shinyServer(function(input, output) {
           minZoom = 1
         )
       ) %>%
-      addMarkers(clusterOptions = markerClusterOptions())
+      addMarkers(
+        clusterOptions = markerClusterOptions(), 
+        popup = ~as.character(paste(type, brand))
+      )
   })
   
   ##
@@ -37,7 +40,7 @@ shinyServer(function(input, output) {
   # Possible objects: marker, map, shape
   # Possible events:  click, mouseover, mouseout, bounds, zoom
 
-  # Should determine wether location is accurate enough to request google places information
+  # Map zoom event
   observe({
     e <- input$map_zoom
     if(is.null(e))
@@ -50,7 +53,9 @@ shinyServer(function(input, output) {
     click <- input$map_click
     if(is.null(click))
       return()
-    output$text <- renderText(paste("Map: Lattitude ", click$lat, "Longtitude ", click$lng))
+    places <- radarSearch(click$lat, click$lng, 1000, type = 'food')
+    output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng))
+    output$text <- renderText(paste("Google Places: ", length(places$results)))
   })
   
   # Should show information about the trash
@@ -58,7 +63,7 @@ shinyServer(function(input, output) {
     click <- input$map_marker_click
     if(is.null(click))
       return()
-    output$text <- renderText(paste("Marker: Lattitude ", click$lat, "Longtitude ", click$lng))
+    output$text <- renderText(paste("Marker: Lat ", click$lat, "Lng ", click$lng))
   })
   
   # Button press should show graphs and additional information
@@ -66,8 +71,3 @@ shinyServer(function(input, output) {
     output$text <- renderText('Button pressed: yes')
   })
 })
-
-
-#nearby <- nearbySearch(52.743, 5.221, 1000)
-#text <- textSearch(52.743, 5.221, 1000)
-#radar <- radarSearch(52.743, 5.221, 1000, type = 'food')
