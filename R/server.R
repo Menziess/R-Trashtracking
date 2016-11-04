@@ -10,7 +10,6 @@ source('externalAPI.R')
 
 trash <- read.csv('../Data/output.csv') 
 trash <- filter(trash, latitude != 0 & latitude != 1 & longitude != 0 & longitude != 1)
-types <- distinct(trash, type)
 
 shinyServer(function(input, output) {
   
@@ -35,6 +34,13 @@ shinyServer(function(input, output) {
         clusterOptions = markerClusterOptions(), 
         popup = ~as.character(paste(type, brand))
       )
+  })
+  
+  ## 
+  # Trash types
+  
+  output$type = renderUI({
+    selectInput("type", NULL, distinct(trash, type))
   })
   
   ##

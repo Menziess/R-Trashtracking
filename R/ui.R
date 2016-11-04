@@ -36,7 +36,7 @@ shinyUI(navbarPage("Trashtracking",
                         "Coca Cole" = "am",
                         "Fanta" = "gear")),
           actionButton("showGraphs", "Weergeef resultaat"),
-          selectInput("type", NULL, choices = c(types)),
+          uiOutput("type"),
           actionButton("showGraphs", "Show Graphs")
         ),
         div(class = "panel-footer", 
