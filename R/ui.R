@@ -10,7 +10,7 @@ source('require.R')
 shinyUI(navbarPage("Trashtracking",
   tabPanel("Map", 
            
-    div(class="outer",
+    div(class="map",
         
       # Include custom CSS
       tags$head(
@@ -33,6 +33,9 @@ shinyUI(navbarPage("Trashtracking",
       )
     )
   ),
-  tabPanel("Search"
+  tabPanel("Tabel",
+    div(class="tabel",
+      dataTableOutput("table")
+    )
   )
 ))

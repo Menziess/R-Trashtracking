@@ -33,6 +33,8 @@ shinyServer(function(input, output) {
       )
   })
   
+  output$table <- renderDataTable({trash})
+  
   ##
   # Observers
   #
