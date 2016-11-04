@@ -14,6 +14,10 @@ types <- distinct(trash, type)
 
 shinyServer(function(input, output) {
   
+  filteredData <- reactive({
+    trash[trash$type == input$type, ]
+  })
+  
   ##
   # Leaflet map
   
@@ -39,6 +43,16 @@ shinyServer(function(input, output) {
   # Events, kind of like "input$map_object_event".
   # Possible objects: marker, map, shape
   # Possible events:  click, mouseover, mouseout, bounds, zoom
+  
+  observe({
+    input$type
+    leafletProxy("map", data = filteredData()) %>%
+      clearMarkerClusters() %>%
+      addMarkers(
+        clusterOptions = markerClusterOptions(), 
+        popup = ~as.character(paste(type, brand))
+      )
+  })
   
   observe({
     e <- input$map_zoom
@@ -67,7 +81,8 @@ shinyServer(function(input, output) {
     output$text <- renderText(paste("Marker: Lat ", click$lat, "Lng ", click$lng))
   })
   
-  observeEvent(input$showGraphs, {
-    output$text <- renderText('Button pressed: yes')
+  observeEvent(input$type, {
+    output$text <- renderText(paste("Input: ", input$type))
   })
+  
 })

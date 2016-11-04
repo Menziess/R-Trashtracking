@@ -23,7 +23,7 @@ shinyUI(navbarPage("Trashtracking",
       absolutePanel(class = "panel panel-primary", bottom = -150, right = -40, draggable = T,
         div(class = "panel-heading", "Controls"),
         div(class = "panel-body",
-          selectInput("type", NULL, choices = c("All")),
+          selectInput("type", NULL, choices = c(types)),
           actionButton("showGraphs", "Show Graphs")
         ),
         div(class = "panel-footer", 
