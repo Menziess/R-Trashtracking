@@ -24,7 +24,19 @@ shinyUI(navbarPage("Trashtracking",
         div(class = "panel-heading", "Controls"),
         div(class = "panel-body",
           selectInput("type", NULL, choices = c("All")),
-          actionButton("showGraphs", "Show Graphs")
+          dateRangeInput("daterange1", "Datum",
+                         start = "2015-05-01",
+                         end   = "2016-03-31"),
+         selectInput("variable", "Type afval:",
+                      c("aluminium blikjes" = "cyl",
+                        "Kartonnen pakje" = "am",
+                        "PET blikje" = "gear",
+                        "Plastic fles" = "fles")),
+          selectInput("variable", "Merk: ",
+                      c("Fernandes" = "cyl",
+                        "Coca Cole" = "am",
+                        "Fanta" = "gear")),
+          actionButton("showGraphs", "Weergeef resultaat")
         ),
         div(class = "panel-footer", 
           # Feedback for the user
@@ -33,7 +45,7 @@ shinyUI(navbarPage("Trashtracking",
       )
     )
   ),
-  tabPanel("Tabel",
+  tabPanel("Details",
     div(class="tabel",
       dataTableOutput("table")
     )
