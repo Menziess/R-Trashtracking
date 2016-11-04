@@ -16,7 +16,7 @@ shinyServer(function(input, output) {
   
   ##
   # Leaflet map
-
+  
   output$map <- renderLeaflet({
     leaflet(trash) %>%
       setView(5, 52, 7) %>%
@@ -33,15 +33,13 @@ shinyServer(function(input, output) {
       )
   })
   
-  output$table <- renderDataTable({trash})
-  
   ##
   # Observers
   #
   # Events, kind of like "input$map_object_event".
   # Possible objects: marker, map, shape
   # Possible events:  click, mouseover, mouseout, bounds, zoom
-
+  
   observe({
     e <- input$map_zoom
     if(is.null(e))
@@ -54,8 +52,12 @@ shinyServer(function(input, output) {
     if(is.null(click))
       return()
     places <- radarSearch(click$lat, click$lng, 1000, type = 'food')
-    output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng))
-    output$text <- renderText(paste("Google Places: ", length(places$results)))
+    
+    analysis <- analyse(trash, places) # Hier moet de analyse worden uitgevoerd (google places VS trash data)
+    
+    # update output
+    output$table <- renderDataTable({analysis})
+    output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng, "Google Places: ", length(places$results)))
   })
   
   observe({

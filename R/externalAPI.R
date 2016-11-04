@@ -30,3 +30,9 @@ radarSearch <- function(latitude = 0, longitude = 0, radius = 100, type = NULL, 
   r <- GET("https://maps.googleapis.com/maps/api/place/radarsearch/json?", query = list(location=paste(latitude, longitude), radius=radius, type=type, name=name, keyword=keyword, key=googleKey))
   return (content(r, "parsed"))
 }
+
+# Analysis function
+analyse <- function(trash, places) {
+  places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
+  return (places)
+}
