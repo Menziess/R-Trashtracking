@@ -14,6 +14,10 @@ types <- distinct(trash, type)
 
 shinyServer(function(input, output) {
   
+  filteredData <- reactive({
+    trash[trash$type == input$type, ]
+  })
+  
   ##
   # Leaflet map
 
@@ -33,15 +37,23 @@ shinyServer(function(input, output) {
       )
   })
   
-  output$table <- renderDataTable({trash})
-  
   ##
   # Observers
   #
   # Events, kind of like "input$map_object_event".
   # Possible objects: marker, map, shape
   # Possible events:  click, mouseover, mouseout, bounds, zoom
-
+  
+  observe({
+    input$type
+    leafletProxy("map", data = filteredData()) %>%
+      clearMarkerClusters() %>%
+      addMarkers(
+        clusterOptions = markerClusterOptions(), 
+        popup = ~as.character(paste(type, brand))
+      )
+  })
+  
   observe({
     e <- input$map_zoom
     if(is.null(e))
@@ -54,9 +66,23 @@ shinyServer(function(input, output) {
     if(is.null(click))
       return()
     places <- radarSearch(click$lat, click$lng, 1000, type = 'food')
-    output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng))
-    output$text <- renderText(paste("Google Places: ", length(places$results)))
+    
+    analysis <- analyse(trash, places) # Hier moet de analyse worden uitgevoerd (google places VS trash data)
+    
+    # update output
+    output$table <- renderDataTable({analysis})
+    output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng, "Google Places: ", length(places$results)))
+    
+    # Alternate icon
+    greenLeafIcon <- makeIcon(
+      iconUrl = "https://lh4.ggpht.com/Tr5sntMif9qOPrKV_UVl7K8A_V3xQDgA7Sw_qweLUFlg76d_vGFA7q1xIKZ6IcmeGqg=w300",
+      iconWidth = 38, iconHeight = 40,
+    )    
+    
+    leafletProxy("map") %>%
+      addMarkers("map", lat = 52.745, lng = 5.221, icon = greenLeafIcon)
   })
+  
   
   observe({
     click <- input$map_marker_click
@@ -65,7 +91,8 @@ shinyServer(function(input, output) {
     output$text <- renderText(paste("Marker: Lat ", click$lat, "Lng ", click$lng))
   })
   
-  observeEvent(input$showGraphs, {
-    output$text <- renderText('Button pressed: yes')
+  observeEvent(input$type, {
+    output$text <- renderText(paste("Input: ", input$type))
   })
+  
 })

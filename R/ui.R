@@ -23,7 +23,6 @@ shinyUI(navbarPage("Trashtracking",
       absolutePanel(class = "panel panel-primary", bottom = -150, right = -40, draggable = T,
         div(class = "panel-heading", "Controls"),
         div(class = "panel-body",
-          selectInput("type", NULL, choices = c("All")),
           dateRangeInput("daterange1", "Datum",
                          start = "2015-05-01",
                          end   = "2016-03-31"),
@@ -36,7 +35,9 @@ shinyUI(navbarPage("Trashtracking",
                       c("Fernandes" = "cyl",
                         "Coca Cole" = "am",
                         "Fanta" = "gear")),
-          actionButton("showGraphs", "Weergeef resultaat")
+          actionButton("showGraphs", "Weergeef resultaat"),
+          selectInput("type", NULL, choices = c(types)),
+          actionButton("showGraphs", "Show Graphs")
         ),
         div(class = "panel-footer", 
           # Feedback for the user
