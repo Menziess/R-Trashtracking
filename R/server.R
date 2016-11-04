@@ -54,7 +54,17 @@ shinyServer(function(input, output) {
     places <- radarSearch(click$lat, click$lng, 1000, type = 'food')
     output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng))
     output$text <- renderText(paste("Google Places: ", length(places$results)))
+    
+    greenLeafIcon <- makeIcon(
+      iconUrl = "https://lh4.ggpht.com/Tr5sntMif9qOPrKV_UVl7K8A_V3xQDgA7Sw_qweLUFlg76d_vGFA7q1xIKZ6IcmeGqg=w300",
+      iconWidth = 38, iconHeight = 40,
+    )
+    
+    
+    leafletProxy("map") %>%
+      addMarkers("map", lat = 52.745, lng = 5.221, icon = greenLeafIcon)
   })
+  
   
   observe({
     click <- input$map_marker_click
