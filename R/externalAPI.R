@@ -27,12 +27,28 @@ textSearch <- function(search = NULL, latitude = 0, longitude = 0, radius = 100,
 radarSearch <- function(latitude = 0, longitude = 0, radius = 100, type = NULL, name = NULL, keyword = NULL) {
   if (is.null(type))
     stop('Missing required parameter "type"')
-  r <- GET("https://maps.googleapis.com/maps/api/place/radarsearch/json?", query = list(location=paste(latitude, longitude), radius=radius, type=type, name=name, keyword=keyword, key=googleKey))
+  tryCatch(r <- GET("https://maps.googleapis.com/maps/api/place/radarsearch/json?", query = list(location=paste(latitude, longitude), radius=radius, type=type, name=name, keyword=keyword, key=googleKey)))
   return (content(r, "parsed"))
 }
 
-# Analysis function
+# API response analysis function
 analyse <- function(trash, places) {
   places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
   return (places)
+}
+
+# Calculate distance in kilometers between two points
+earth.dist <- function (long1, lat1, long2, lat2) {
+  rad <- pi/180
+  a1 <- lat1 * rad
+  a2 <- long1 * rad
+  b1 <- lat2 * rad
+  b2 <- long2 * rad
+  dlon <- b2 - a2
+  dlat <- b1 - a1
+  a <- (sin(dlat/2))^2 + cos(a1) * cos(b1) * (sin(dlon/2))^2
+  c <- 2 * atan2(sqrt(a), sqrt(1 - a))
+  R <- 6378.145
+  d <- R * c
+  return(d)
 }

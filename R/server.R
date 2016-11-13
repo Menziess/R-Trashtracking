@@ -11,11 +11,7 @@ source('externalAPI.R')
 trash <- read.csv('../Data/output.csv') 
 trash <- filter(trash, latitude != 0 & latitude != 1 & longitude != 0 & longitude != 1)
 
-shinyServer(function(input, output) {
-  
-  filteredData <- reactive({
-    trash[trash$type == input$type, ]
-  })
+shinyServer(function(input, output, session) {
   
   ##
   # Leaflet map
@@ -31,16 +27,21 @@ shinyServer(function(input, output) {
         )
       ) %>%
       addMarkers(
+        clusterId = 'trash',
         clusterOptions = markerClusterOptions(), 
         popup = ~as.character(paste(type, brand))
       )
   })
   
+  filteredData <- reactive({
+    trash[trash$type == input$trashType, ]
+  })
+  
   ## 
   # Trash types
   
-  output$type = renderUI({
-    selectInput("type", NULL, distinct(trash, type))
+  output$trashTypeInput = renderUI({
+    selectInput("trashType", NULL, distinct(trash, type))
   })
   
   ##
@@ -53,8 +54,9 @@ shinyServer(function(input, output) {
   observe({
     input$type
     leafletProxy("map", data = filteredData()) %>%
-      clearMarkerClusters() %>%
+      removeMarkerCluster('trash') %>%
       addMarkers(
+        clusterId = 'trash',
         clusterOptions = markerClusterOptions(), 
         popup = ~as.character(paste(type, brand))
       )
@@ -71,6 +73,7 @@ shinyServer(function(input, output) {
     click <- input$map_click
     if(is.null(click))
       return()
+    
     places <- radarSearch(click$lat, click$lng, 1000, type = 'food')
     
     analysis <- analyse(trash, places) # Hier moet de analyse worden uitgevoerd (google places VS trash data)
@@ -82,11 +85,19 @@ shinyServer(function(input, output) {
     # Alternate icon
     greenLeafIcon <- makeIcon(
       iconUrl = "https://lh4.ggpht.com/Tr5sntMif9qOPrKV_UVl7K8A_V3xQDgA7Sw_qweLUFlg76d_vGFA7q1xIKZ6IcmeGqg=w300",
-      iconWidth = 38, iconHeight = 40,
-    )    
+      iconWidth = 38, iconHeight = 40
+    )
     
-    leafletProxy("map") %>%
-      addMarkers("map", lat = 52.745, lng = 5.221, icon = greenLeafIcon)
+    # Adds google search locations to the map
+    leafletProxy("map", data = analysis) %>%
+      clearGroup('analysis') %>%
+      addMarkers(
+        group = 'analysis',
+        analysis$geometry.location.lng, analysis$geometry.location.lat,
+        popup = 'food',
+        icon = greenLeafIcon
+      )
+    
   })
   
   
@@ -101,4 +112,7 @@ shinyServer(function(input, output) {
     output$text <- renderText(paste("Input: ", input$type))
   })
   
+  observeEvent(input$showDetails, {
+    updateNavbarPage(session, "Trashtracking", "Details")
+  })
 })
