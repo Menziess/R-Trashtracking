@@ -38,7 +38,7 @@ shinyServer(function(input, output, session) {
   })
   
   ## 
-  # Trash types
+  # Trash types input
   
   output$trashTypeInput = renderUI({
     selectInput("trashType", NULL, distinct(trash, type))
