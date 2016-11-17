@@ -7,7 +7,8 @@
 
 source('require.R')
 
-shinyUI(navbarPage("Trashtracking",
+shinyUI(navbarPage("Trashtracking", 
+  id = "Trashtracking",
   tabPanel("Map", 
            
     div(class="map",
@@ -26,18 +27,18 @@ shinyUI(navbarPage("Trashtracking",
           dateRangeInput("daterange1", "Datum",
                          start = "2015-05-01",
                          end   = "2016-03-31"),
-         selectInput("variable", "Type afval:",
+          selectInput("variable", "Type afval:",
                       c("aluminium blikjes" = "cyl",
                         "Kartonnen pakje" = "am",
                         "PET blikje" = "gear",
                         "Plastic fles" = "fles")),
+          uiOutput("trashTypeInput"),
           selectInput("variable", "Merk: ",
                       c("Fernandes" = "cyl",
                         "Coca Cole" = "am",
                         "Fanta" = "gear")),
-          actionButton("showGraphs", "Weergeef resultaat"),
-          selectInput("type", NULL, choices = c(types)),
-          actionButton("showGraphs", "Show Graphs")
+          hr(),
+          actionButton("showDetails", "Show Details")
         ),
         div(class = "panel-footer", 
           # Feedback for the user
