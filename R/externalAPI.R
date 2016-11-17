@@ -33,22 +33,13 @@ radarSearch <- function(latitude = 0, longitude = 0, radius = 100, type = NULL, 
 
 # API response analysis function
 analyse <- function(trash, places) {
-  places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
-  return (places)
-}
-
-# Calculate distance in kilometers between two points
-earth.dist <- function (long1, lat1, long2, lat2) {
-  rad <- pi/180
-  a1 <- lat1 * rad
-  a2 <- long1 * rad
-  b1 <- lat2 * rad
-  b2 <- long2 * rad
-  dlon <- b2 - a2
-  dlat <- b1 - a1
-  a <- (sin(dlat/2))^2 + cos(a1) * cos(b1) * (sin(dlon/2))^2
-  c <- 2 * atan2(sqrt(a), sqrt(1 - a))
-  R <- 6378.145
-  d <- R * c
-  return(d)
+  
+  # create distance matrix
+  matrix <- distm(places[,c('geometry.location.lng','geometry.location.lat')], 
+                  trash[,c('longitude','latitude')], fun=distVincentyEllipsoid)
+  
+  # assign the name to the point in placecs based on shortest distance in the matrix
+  trash$locality <- places$id[apply(matrix, 1, which.min)]
+  
+  return (trash)
 }

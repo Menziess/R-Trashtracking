@@ -84,11 +84,15 @@ shinyServer(function(input, output, session) {
       return()
     
     places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
-    
-    analysis <- analyse(trash, places) # Hier moet de analyse worden uitgevoerd (google places VS trash data)
+    places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
+    trash <- filter(trash, latitude > click$lat - 0.1 & latitude < click$lat + 0.1
+                    & longitude > click$lng - 0.1 & longitude < click$lng + 0.1)
     
     # update output
-    output$table <- renderDataTable({analysis})
+    output$table <- renderDataTable({
+      analyse(trash, places)
+    })
+    
     output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng, "Google Places: ", length(places$results)))
     
     # Alternate icon
@@ -98,15 +102,14 @@ shinyServer(function(input, output, session) {
     )
     
     # Adds google search locations to the map
-    leafletProxy("map", data = analysis) %>%
+    leafletProxy("map", data = places) %>%
       clearGroup('analysis') %>%
       addMarkers(
         group = 'analysis',
-        analysis$geometry.location.lng, analysis$geometry.location.lat,
+        places$geometry.location.lng, places$geometry.location.lat,
         popup = 'food',
         icon = greenLeafIcon
       )
-    
   })
   
   
