@@ -90,6 +90,14 @@ shinyServer(function(input, output, session) {
       return()
     
     places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
+    
+    if(length(places$resuls) == 0){
+      output$locaties <- renderText(paste("Geen locaties gevonden met gebruikte parameters."))
+    }
+    
+    if(length(places$results) > 0){
+    output$locaties <- renderText(paste(length(places$results), "locaties gevonden."))
+    
     places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
     trash <- filter(trash, latitude > click$lat - 0.1 & latitude < click$lat + 0.1
                     & longitude > click$lng - 0.1 & longitude < click$lng + 0.1)
@@ -113,9 +121,10 @@ shinyServer(function(input, output, session) {
       addMarkers(
         group = 'analysis',
         places$geometry.location.lng, places$geometry.location.lat,
-        popup = 'food',
+        popup = input$locationType,
         icon = greenLeafIcon
       )
+    }
   })
   
   

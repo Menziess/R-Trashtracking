@@ -31,15 +31,9 @@ shinyUI(navbarPage("Trashtracking",
                          start = "2015-05-01",
                          end   = "2016-03-31"),
           helpText(" Choose a type or brand"),
-
           uiOutput("trashTypeInput"),
           uiOutput("trashBrandInput"),
-          selectizeInput("random", label= "Also show me nearby locations..", 
-                         choices = c("School", "Shops", "Restaurants"), selected = NULL,
-                         multiple = FALSE,
-                         options = NULL),
           hr(),
-          textOutput("Locaties"),
           uiOutput("locationTypeInput"),
           sliderInput("distanceSlider", "Afstand",
                       min = 100, max = 2500, value = 1000),
@@ -48,6 +42,7 @@ shinyUI(navbarPage("Trashtracking",
         ),
         div(class = "panel-footer", 
           # Feedback for the user
+          textOutput("locaties"),
           textOutput("text")
         )
       )
