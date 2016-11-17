@@ -35,6 +35,8 @@ analyse <- function(trash, places) {
 
 test <- analyse(trash, places)
 
+
+
 ##
 # Cluster example
 clusters <- function(x, centers) {

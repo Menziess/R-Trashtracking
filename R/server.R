@@ -38,10 +38,19 @@ shinyServer(function(input, output, session) {
   })
   
   ## 
-  # Trash types
+  # Trash types input
   
   output$trashTypeInput = renderUI({
     selectInput("trashType", NULL, distinct(trash, type))
+  })
+  
+  output$locationTypeInput = renderUI({
+    locationTypes <-  c("School" = "school",
+                        "Bar" = "bar",
+                        "Bakkerij" = "bakery",
+                        "Cafe" = "cafe",
+                        "Convenience Store" = "convenience_store")
+    selectInput("locationType", NULL, locationTypes)
   })
   
   ##
@@ -74,7 +83,7 @@ shinyServer(function(input, output, session) {
     if(is.null(click))
       return()
     
-    places <- radarSearch(click$lat, click$lng, 1000, type = 'food')
+    places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
     
     analysis <- analyse(trash, places) # Hier moet de analyse worden uitgevoerd (google places VS trash data)
     
@@ -107,6 +116,7 @@ shinyServer(function(input, output, session) {
       return()
     output$text <- renderText(paste("Marker: Lat ", click$lat, "Lng ", click$lng))
   })
+  
   
   observeEvent(input$type, {
     output$text <- renderText(paste("Input: ", input$type))
