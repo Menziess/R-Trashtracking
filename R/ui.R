@@ -24,18 +24,25 @@ shinyUI(navbarPage("Trashtracking",
       absolutePanel(class = "panel panel-primary", bottom = -150, right = -40, draggable = T,
         div(class = "panel-heading", "Controls"),
         div(class = "panel-body",
+
          
             # input user  
           dateRangeInput("daterange1", "About the Trash..",
                          start = "2015-05-01",
                          end   = "2016-03-31"),
           helpText(" Choose a type or brand"),
+
           uiOutput("trashTypeInput"),
           uiOutput("trashBrandInput"),
           selectizeInput("random", label= "Also show me nearby locations..", 
                          choices = c("School", "Shops", "Restaurants"), selected = NULL,
                          multiple = FALSE,
                          options = NULL),
+          hr(),
+          textOutput("Locaties"),
+          uiOutput("locationTypeInput"),
+          sliderInput("distanceSlider", "Afstand",
+                      min = 100, max = 2500, value = 1000),
           hr(),
           actionButton("showDetails", "Show Details")
         ),
