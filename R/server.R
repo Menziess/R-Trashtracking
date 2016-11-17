@@ -35,13 +35,18 @@ shinyServer(function(input, output, session) {
   
   filteredData <- reactive({
     trash[trash$type == input$trashType, ]
+    trash[trash$brand == input$trashBrand, ]
   })
-  
+
   ## 
   # Trash types
   
   output$trashTypeInput = renderUI({
     selectInput("trashType", NULL, distinct(trash, type))
+  })
+  
+  output$trashBrandInput = renderUI({
+    selectInput("trashBrand", NULL, distinct(trash, brand)) 
   })
   
   ##
