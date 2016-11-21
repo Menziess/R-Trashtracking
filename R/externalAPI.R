@@ -33,13 +33,13 @@ radarSearch <- function(latitude = 0, longitude = 0, radius = 100, type = NULL, 
 
 # API response analysis function
 analyse <- function(trash, places) {
+  # places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
+  matrix <- distm(trash[,c('longitude','latitude')], 
+                  places[,c('geometry.location.lng','geometry.location.lat')], 
+                  fun=distVincentyEllipsoid)
+  trash$place_id <- places$place_id[apply(matrix, 1, which.min)]  
+  trash <- trash %>% count(place_id, sort = TRUE)
+  total <- merge(trash, places, by=c("place_id", "place_id"))
   
-  # create distance matrix
-  matrix <- distm(places[,c('geometry.location.lng','geometry.location.lat')], 
-                  trash[,c('longitude','latitude')], fun=distVincentyEllipsoid)
-  
-  # assign the name to the point in placecs based on shortest distance in the matrix
-  trash$locality <- places$id[apply(matrix, 1, which.min)]
-  
-  return (trash)
+  return (total)
 }
