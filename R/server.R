@@ -112,6 +112,8 @@ shinyServer(function(input, output, session) {
     
     if(length(places$resuls) == 0){
       output$locaties <- renderText(paste("Geen locaties gevonden met gebruikte parameters."))
+      leafletProxy("map", data = places) %>%
+        clearGroup("analysis")
     }
     
     if(length(places$results) > 0){
