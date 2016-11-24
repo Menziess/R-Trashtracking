@@ -93,6 +93,8 @@ shinyServer(function(input, output, session) {
   #      Observers      #
   #######################
   
+  map <- leafletProxy("map")
+  
   # Input type changes
   observe({
     input$type
@@ -120,54 +122,63 @@ shinyServer(function(input, output, session) {
       return()
     
     places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
-    
-    if(length(places$resuls) == 0) {
-      output$text <- renderText(paste("No places found in this area."))
-    }
-    
-    if(length(places$results) > 0) {
-      output$locations <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locations found."))
-    } 
-    
-    # Preperation
     nrResults <- length(places$results)
-    places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
-    distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
-    trash <- filter(trash, latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
-                    & longitude > click$lng - distanceInLatLng[[2]] & longitude < click$lng + distanceInLatLng[[2]])
+    analyzation <- NULL
     
-    # Analyzation
-    analyzation <- analyse(trash, places)
+    if(nrResults == 0) {
+      output$text <- renderText(paste("No places found in this area."))
+    } else {
+
+      places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
+      
+      # Preperation
+      distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
+      trash <- filter(trash, latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
+                      & longitude > click$lng - distanceInLatLng[[2]] & longitude < click$lng + distanceInLatLng[[2]])
+      # Analyzation
+      analyzation <- analyse(trash, places)
+      
+      # Alternate icon
+      greenLeafIcon <- makeIcon(
+        iconUrl = "https://lh4.ggpht.com/Tr5sntMif9qOPrKV_UVl7K8A_V3xQDgA7Sw_qweLUFlg76d_vGFA7q1xIKZ6IcmeGqg=w300",
+        iconWidth = 38, iconHeight = 40
+      )
+      
+      # Adds google search locations to the map
+      map %>% 
+        clearGroup('analysis') %>%
+        addMarkers(
+          data = places,
+          group = 'analysis',
+          lng = places$geometry.location.lng, 
+          lat = places$geometry.location.lat,
+          popup = input$locationType,
+          icon = greenLeafIcon
+        )
+    } 
     
     # Update table
     output$table <- renderDataTable({
-      analyzation
+      if(!is.null(analyzation)) {
+        analyzation  
+      }
     })
     
     # Update plot
     output$plot <- renderPlot({
-      plot(as.data.frame(unclass(table(analyzation$place_id, analyzation$n))))
+      if(!is.null(analyzation)) {
+        plot(as.data.frame(unclass(table(analyzation$place_id, analyzation$n))))  
+      }
     })
     
     # Informative text
     output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng))
+    output$locations <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locations found."))
     
-    # Alternate icon
-    greenLeafIcon <- makeIcon(
-      iconUrl = "https://lh4.ggpht.com/Tr5sntMif9qOPrKV_UVl7K8A_V3xQDgA7Sw_qweLUFlg76d_vGFA7q1xIKZ6IcmeGqg=w300",
-      iconWidth = 38, iconHeight = 40
-    )
-
-    # Adds google search locations to the map
-    map <- leafletProxy("map", data = places) %>%
-      clearGroup('analysis') %>%
-      addMarkers(
-        group = 'analysis',
-        places$geometry.location.lng, places$geometry.location.lat,
-        popup = input$locationType,
-        icon = greenLeafIcon
-      )
-    
+    # Add distance circle
+    map %>% 
+      clearGroup('circles') %>%
+      addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles")
     
     # Hide markers button
     if (!input$checkboxLocationInput) {
@@ -183,6 +194,13 @@ shinyServer(function(input, output, session) {
     if(is.null(click))
       return()
     output$text <- renderText(paste("Marker: Lat ", click$lat, "Lng ", click$lng))
+  })
+  
+  observe({
+    click <- input$map_shape_click
+    if(is.null(click))
+      return()
+    map %>% clearGroup('circles')
   })
   
   # Button Detail Page

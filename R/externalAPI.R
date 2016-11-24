@@ -31,12 +31,14 @@ radarSearch <- function(latitude = 0, longitude = 0, radius = 100, type = NULL, 
   return (content(r, "parsed"))
 }
 
-# API response analysis function
+# API response analysis function to associate trash with places
 analyse <- function(trash, places) {
-  # places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
-  matrix <- distm(trash[,c('longitude','latitude')], 
-                  places[,c('geometry.location.lng','geometry.location.lat')], 
-                  fun=distVincentyEllipsoid)
+  matrix <- distm(
+    trash[,c('longitude','latitude')], 
+    places[,c('geometry.location.lng','geometry.location.lat')], 
+    fun=distVincentyEllipsoid
+  )
+  
   trash$place_id <- places$place_id[apply(matrix, 1, which.min)]  
   trash <- trash %>% count(place_id, sort = TRUE)
   total <- merge(trash, places, by=c("place_id", "place_id")) %>% arrange(desc(n))
@@ -47,11 +49,10 @@ analyse <- function(trash, places) {
 # Convert meters to bearing
 metersToLatLng <- function(lat, lng, meters) {
 
-  # Rough amount of meters per degree
-  R=111111
+  R=111111 # Rough amount of meters per degree
   
-  dLat = abs(meters/R)
-  dLng = abs(dLat * cos(lat))
+  dLat = abs(meters/R)        # Difference in latitude
+  dLng = abs(dLat * cos(lat)) # Difference in longitude
 
   return (list(dLat, dLng))
 }
