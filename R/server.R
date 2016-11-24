@@ -93,9 +93,10 @@ shinyServer(function(input, output, session) {
   #      Observers      #
   #######################
   
+  # Input type changes
   observe({
     input$type
-    leafletProxy("map", data = filteredData()) %>%
+    map <- leafletProxy("map", data = filteredData()) %>%
       removeMarkerCluster('trash') %>%
       addMarkers(
         clusterId = 'trash',
@@ -104,6 +105,7 @@ shinyServer(function(input, output, session) {
       )
   })
   
+  # Map zoom
   observe({
     e <- input$map_zoom
     if(is.null(e))
@@ -111,6 +113,7 @@ shinyServer(function(input, output, session) {
     output$text <- renderText(paste("Zoom: ", e))
   })
   
+  # Map click
   observe({
     click <- input$map_click
     if(is.null(click))
@@ -119,31 +122,34 @@ shinyServer(function(input, output, session) {
     places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
     
     if(length(places$resuls) == 0) {
-      output$locaties <- renderText(paste("Geen locaties gevonden met gebruikte parameters."))
+      output$text <- renderText(paste("No places found in this area."))
     }
     
     if(length(places$results) > 0) {
-      output$locaties <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locaties gevonden."))
+      output$locations <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locations found."))
+    } 
     
-    
+    # Preperation
     nrResults <- length(places$results)
-    distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
     places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
+    distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
     trash <- filter(trash, latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
                     & longitude > click$lng - distanceInLatLng[[2]] & longitude < click$lng + distanceInLatLng[[2]])
     
+    # Analyzation
+    analyzation <- analyse(trash, places)
+    
     # Update table
     output$table <- renderDataTable({
-      analyse(trash, places)
+      analyzation
     })
     
-    # Update graph
-    output$graph <- renderPlot({
-      d <- analyse(trash, places)
-      d <- as.data.frame(unclass(table(d$place_id, d$n)))
-      plot(d)
+    # Update plot
+    output$plot <- renderPlot({
+      plot(as.data.frame(unclass(table(analyzation$place_id, analyzation$n))))
     })
     
+    # Informative text
     output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng))
     
     # Alternate icon
@@ -153,7 +159,7 @@ shinyServer(function(input, output, session) {
     )
 
     # Adds google search locations to the map
-    leafletProxy("map", data = places) %>%
+    map <- leafletProxy("map", data = places) %>%
       clearGroup('analysis') %>%
       addMarkers(
         group = 'analysis',
@@ -161,28 +167,22 @@ shinyServer(function(input, output, session) {
         popup = input$locationType,
         icon = greenLeafIcon
       )
-      
-      if (input$checkboxLocationInput == FALSE){
-        leafletProxy("map", data = places) %>%
-          hideGroup("analysis")
-      } else {
-        leafletProxy("map", data = places) %>%
-          showGroup("analysis")
-      }
+    
+    
+    # Hide markers button
+    if (!input$checkboxLocationInput) {
+      map %>% hideGroup("analysis")
+    } else {
+      map %>% showGroup("analysis")
     }
   })
   
-  
+  # Marker click
   observe({
     click <- input$map_marker_click
     if(is.null(click))
       return()
     output$text <- renderText(paste("Marker: Lat ", click$lat, "Lng ", click$lng))
-  })
-  
-  # 
-  observeEvent(input$type, {
-    output$text <- renderText(paste("Input: ", input$type))
   })
   
   # Button Detail Page

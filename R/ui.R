@@ -48,14 +48,14 @@ shinyUI(navbarPage("Trashtracking",
           helpText("Distance in meters"),
           sliderInput("distanceSlider", NULL,
                       min = 100, max = 2500, value = 1000),
-          checkboxInput("checkboxLocationInput", "Show locations on map", value = FALSE),
+          checkboxInput("checkboxLocationInput", "Show Places on the map", value = T),
           hr(), 
           
           # Button
           actionButton("showDetails", "Show Details")
         ),
         div(class = "panel-footer", 
-          textOutput("locaties"),
+          textOutput("locations"),
           textOutput("text")
         )
       )
@@ -76,9 +76,9 @@ shinyUI(navbarPage("Trashtracking",
   #        Graph         #
   ########################
   
-  tabPanel("Graph",
-    div(class="graph",
-      plotOutput("graph")
+  tabPanel("Plot",
+    div(class="plot",
+      plotOutput("plot")
     )
   )
 ))

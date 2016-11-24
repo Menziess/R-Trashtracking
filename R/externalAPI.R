@@ -39,7 +39,7 @@ analyse <- function(trash, places) {
                   fun=distVincentyEllipsoid)
   trash$place_id <- places$place_id[apply(matrix, 1, which.min)]  
   trash <- trash %>% count(place_id, sort = TRUE)
-  total <- merge(trash, places, by=c("place_id", "place_id"))
+  total <- merge(trash, places, by=c("place_id", "place_id")) %>% arrange(desc(n))
   
   return (total)
 }
