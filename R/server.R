@@ -99,7 +99,7 @@ shinyServer(function(input, output, session) {
     output$locaties <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locaties gevonden."))
     
     nrResults <- length(places$results)
-    distanceInLatLng < metersToLatLng(input$distanceSlider)
+    distanceInLatLng <- metersToLatLng(input$distanceSlider)
     places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
     trash <- filter(trash, latitude > click$lat - distanceInLatLng & latitude < click$lat + distanceInLatLng
                     & longitude > click$lng - distanceInLatLng & longitude < click$lng + distanceInLatLng)
