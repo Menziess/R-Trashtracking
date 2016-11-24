@@ -32,7 +32,7 @@ analyse <- function(trash, places) {
   # stopCluster(cl)
   
   trash <- trash %>% count(place_id, sort = TRUE)
-  total  <- merge(trash, places, by=c("place_id", "place_id"))
+  total <- merge(trash, places, by=c("place_id", "place_id"))
   
   return (total)
 }

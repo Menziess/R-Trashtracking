@@ -33,19 +33,19 @@ shinyServer(function(input, output, session) {
       )
   })
   
+  # Filtered Trash by type and brand
   filteredData <- reactive({
     trash[trash$type == input$trashType, ]
     trash[trash$brand == input$trashBrand, ]
   })
 
-  ## 
-  # Trash types input
-  
+  # Trash type  
   output$trashTypeInput = renderUI({
-    selectInput("trashType", NULL, distinct(trash, type))
+    names <- distinct(trash, type)
+    selectInput("trashType", NULL, c("All", names))
   })
   
-
+  # Trash brand
   output$trashBrandInput = renderUI({
     selectInput("trashBrand", NULL, distinct(trash, brand))
   })
@@ -96,18 +96,20 @@ shinyServer(function(input, output, session) {
     }
     
     if(length(places$results) > 0){
-    output$locaties <- renderText(paste(length(places$results), "locaties gevonden."))
+    output$locaties <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locaties gevonden."))
     
+    nrResults <- length(places$results)
+    distanceInLatLng < metersToLatLng(input$distanceSlider)
     places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
-    trash <- filter(trash, latitude > click$lat - 0.1 & latitude < click$lat + 0.1
-                    & longitude > click$lng - 0.1 & longitude < click$lng + 0.1)
+    trash <- filter(trash, latitude > click$lat - distanceInLatLng & latitude < click$lat + distanceInLatLng
+                    & longitude > click$lng - distanceInLatLng & longitude < click$lng + distanceInLatLng)
     
     # update output
     output$table <- renderDataTable({
       analyse(trash, places)
     })
     
-    output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng, "Google Places: ", length(places$results)))
+    output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng))
     
     # Alternate icon
     greenLeafIcon <- makeIcon(
@@ -135,11 +137,12 @@ shinyServer(function(input, output, session) {
     output$text <- renderText(paste("Marker: Lat ", click$lat, "Lng ", click$lng))
   })
   
-  
+  # 
   observeEvent(input$type, {
     output$text <- renderText(paste("Input: ", input$type))
   })
   
+  # Button Detail Page
   observeEvent(input$showDetails, {
     updateNavbarPage(session, "Trashtracking", "Details")
   })

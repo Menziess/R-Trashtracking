@@ -43,3 +43,8 @@ analyse <- function(trash, places) {
   
   return (total)
 }
+
+# Convert meters to bearing
+distanceInLatLng <- function(meters) {
+  return(meters / 100)
+}
