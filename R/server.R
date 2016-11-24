@@ -13,8 +13,9 @@ trash <- filter(trash, latitude != 0 & latitude != 1 & longitude != 0 & longitud
 
 shinyServer(function(input, output, session) {
   
-  ##
-  # Leaflet map
+  ########################
+  # Initial Leaflet Map  #
+  ########################
 
   output$map <- renderLeaflet({
     leaflet(trash) %>%
@@ -33,7 +34,10 @@ shinyServer(function(input, output, session) {
       )
   })
   
-  # Filtered Trash by type and brand
+  ########################
+  # Reactive Data Filter #
+  ########################
+  
   filteredData <- reactive({
     t <- trash
     if (!is.null(input$trashType) && input$trashType != 'All') {
@@ -48,6 +52,10 @@ shinyServer(function(input, output, session) {
     return (t)
   })
 
+  #######################
+  #       Inputs        #
+  #######################
+  
   # Trash type  
   output$trashTypeInput = renderUI({
     names <- distinct(trash, type)
@@ -81,12 +89,9 @@ shinyServer(function(input, output, session) {
     selectInput("locationType", NULL, locationTypes)
   })
   
-  ##
-  # Observers
-  #
-  # Events, kind of like "input$map_object_event".
-  # Possible objects: marker, map, shape
-  # Possible events:  click, mouseover, mouseout, bounds, zoom
+  #######################
+  #      Observers      #
+  #######################
   
   observe({
     input$type
@@ -157,13 +162,13 @@ shinyServer(function(input, output, session) {
         icon = greenLeafIcon
       )
       
-      # if (input$checkboxLocationInput == FALSE){
-      #   leafletProxy("map", data = places) %>%
-      #     hideGroup("analysis")
-      # } else {
-      #   leafletProxy("map", data = places) %>%
-      #     showGroup("analysis")
-      # }
+      if (input$checkboxLocationInput == FALSE){
+        leafletProxy("map", data = places) %>%
+          hideGroup("analysis")
+      } else {
+        leafletProxy("map", data = places) %>%
+          showGroup("analysis")
+      }
     }
   })
   

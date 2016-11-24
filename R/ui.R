@@ -13,47 +13,69 @@ shinyUI(navbarPage("Trashtracking",
            
     div(class="map",
         
-      # Include custom CSS
+      ########################
+      #   Links and Scripts  #
+      ########################
+        
       tags$head(
         includeCSS("styles.css")
         # includeScript("script.js")
       ),
     
-      # Leaflet map
+      ########################
+      #      Leaflet Map     #
+      ########################
+      
       leafletOutput("map", width = "100%", height = "100%"),
       absolutePanel(class = "panel panel-primary", bottom = -150, right = -40, draggable = T,
         div(class = "panel-heading", "Controls"),
         div(class = "panel-body",
 
          
-            # input user  
-          dateRangeInput("daterange1", "About the Trash..",
+          # Trash  
+          h4("Trash"),
+          dateRangeInput("daterange1", NULL,
                          start = "2015-05-01",
                          end   = "2016-03-31"),
-          helpText(" Choose a type or brand"),
+          helpText("Choose type or brand"),
           uiOutput("trashTypeInput"),
           uiOutput("trashBrandInput"),
-          hr(),
+          hr(), 
+          
+          # Places
+          h4("Google Places"),
           uiOutput("locationTypeInput"),
-          checkboxInput("checkboxLocationInput", "Show locations on map", value = FALSE),
-          sliderInput("distanceSlider", "Afstand",
+          helpText("Distance in meters"),
+          sliderInput("distanceSlider", NULL,
                       min = 100, max = 2500, value = 1000),
-          hr(),
+          checkboxInput("checkboxLocationInput", "Show locations on map", value = FALSE),
+          hr(), 
+          
+          # Button
           actionButton("showDetails", "Show Details")
         ),
         div(class = "panel-footer", 
-          # Feedback for the user
           textOutput("locaties"),
           textOutput("text")
         )
       )
     )
   ),
+  
+  ########################
+  #         Table        #
+  ########################
+  
   tabPanel("Details",
     div(class="tabel",
       dataTableOutput("table")
     )
   ),
+  
+  ########################
+  #        Graph         #
+  ########################
+  
   tabPanel("Graph",
     div(class="graph",
       plotOutput("graph")
