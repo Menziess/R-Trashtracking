@@ -10,12 +10,12 @@ source('externalAPI.R')
 
 trash <- read.csv('../Data/output.csv') 
 trash <- filter(trash, latitude != 0 & latitude != 1 & longitude != 0 & longitude != 1)
-types <- distinct(trash, type)
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   
-  ##
-  # Leaflet map
+  ########################
+  # Initial Leaflet Map  #
+  ########################
 
   output$map <- renderLeaflet({
     leaflet(trash) %>%
@@ -28,19 +28,83 @@ shinyServer(function(input, output) {
         )
       ) %>%
       addMarkers(
+        clusterId = 'trash',
         clusterOptions = markerClusterOptions(), 
         popup = ~as.character(paste(type, brand))
       )
   })
   
-  ##
-  # Observers
-  #
-  # Events, kind of like "input$map_object_event".
-  # Possible objects: marker, map, shape
-  # Possible events:  click, mouseover, mouseout, bounds, zoom
+  ########################
+  # Reactive Data Filter #
+  ########################
+  
+  filteredData <- reactive({
+    if (!is.null(input$trashType) && input$trashType != 'All') {
+      trash <- subset(trash, trash$type == input$trashType)
+    }
+    if (!is.null(input$trashBrand) && input$trashBrand != 'All') {
+      trash <- subset(trash, trash$brand == input$trashBrand)
+    }
+    
+    return (trash)
+  })
 
-  # Map zoom event
+  #######################
+  #       Inputs        #
+  #######################
+  
+  # Trash type  
+  output$trashTypeInput = renderUI({
+    names <- distinct(trash, type)
+    selectInput("trashType", NULL, c("All", as.character(names$type)))
+  })
+  
+  # Trash brand
+  output$trashBrandInput = renderUI({
+    names <- distinct(trash, brand)
+    selectInput("trashBrand", NULL, c('All', as.character(names$brand)))
+  })
+  
+  output$locationTypeInput = renderUI({
+    locationTypes <-  c("Afhaalrestaurants" = "meal_takeaway",
+                        "Bakkerij" = "bakery",
+                        "Bar" = "bar",
+                        "Bioscoop" = "movie_theater",
+                        "Cafe" = "cafe",
+                        "Casino" = "casino",
+                        "Dierentuin" = "zoo",
+                        "Kampeerplek" = "campground",
+                        "Museum" = "museum",
+                        "Nachtclub" = "night_club",
+                        "Pretpark" = "amusement_park",
+                        "School" = "school",
+                        "Stadion" = "stadium",
+                        "Tankstation" = "gas_station",
+                        "Universiteit" = "university",
+                        "Warenhuis" = "department_store",
+                        "Winkel" = "Store")
+    selectInput("locationType", NULL, locationTypes)
+  })
+  
+  #######################
+  #      Observers      #
+  #######################
+  
+  map <- leafletProxy("map")
+  
+  # Input type changes
+  observe({
+    input$type
+    map <- leafletProxy("map", data = filteredData()) %>%
+      removeMarkerCluster('trash') %>%
+      addMarkers(
+        clusterId = 'trash',
+        clusterOptions = markerClusterOptions(), 
+        popup = ~as.character(paste(type, brand))
+      )
+  })
+  
+  # Map zoom
   observe({
     e <- input$map_zoom
     if(is.null(e))
@@ -48,17 +112,87 @@ shinyServer(function(input, output) {
     output$text <- renderText(paste("Zoom: ", e))
   })
   
-  # Should output usefull information about the information and trash at that location
+  # Map click
   observe({
     click <- input$map_click
     if(is.null(click))
       return()
-    places <- radarSearch(click$lat, click$lng, 1000, type = 'food')
-    output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng))
-    output$text <- renderText(paste("Google Places: ", length(places$results)))
+
+    places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
+    nrResults <- length(places$results)
+    analyzation <- NULL
+    
+    if(nrResults == 0) {
+      output$text <- renderText(paste("No places found in this area."))
+    } else {
+      
+      # Flatten places
+      places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
+      
+      # Preperation
+      distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
+      trash <- filter(isolate(filteredData()), latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
+                      & longitude > click$lng - distanceInLatLng[[2]] & longitude < click$lng + distanceInLatLng[[2]])
+
+      # Analyzation
+      analyzation <- analyse(trash, places)
+      
+      # Alternate icon
+      greenLeafIcon <- makeIcon(
+        iconUrl = "https://lh4.ggpht.com/Tr5sntMif9qOPrKV_UVl7K8A_V3xQDgA7Sw_qweLUFlg76d_vGFA7q1xIKZ6IcmeGqg=w300",
+        iconWidth = 38, iconHeight = 40
+      )
+      
+      # Adds google search locations to the map
+      map %>% 
+        clearGroup('analysis') %>%
+        addMarkers(
+          data = places,
+          group = 'analysis',
+          lng = places$geometry.location.lng, 
+          lat = places$geometry.location.lat,
+          popup = input$locationType,
+          icon = greenLeafIcon
+        )
+    } 
+    
+    # Update table
+    output$table <- renderDataTable({
+      if(!is.null(analyzation)) {
+        analyzation  
+      }
+    })
+    
+    # Update plot
+    output$plot <- renderPlot({
+      if(!is.null(analyzation)) {
+        plot(as.data.frame(unclass(table(analyzation$place_id, analyzation$n))))  
+      }
+    })
+    
+    # Informative text
+    output$text <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locations found."))
+    output$story <- renderText(paste(
+      input$locationType, 
+      input$trashType, 
+      input$trashBrand, 
+      input$distanceSlider
+    ))
+    
+    # Add distance circle
+    map %>% 
+      clearGroup('circles') %>%
+      addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles")
+    
+    # Hide markers button
+    if (!input$checkboxLocationInput) {
+      map %>% hideGroup("analysis")
+    } else {
+      map %>% showGroup("analysis")
+    }
   })
   
-  # Should show information about the trash
+  # Marker click
   observe({
     click <- input$map_marker_click
     if(is.null(click))
@@ -66,8 +200,16 @@ shinyServer(function(input, output) {
     output$text <- renderText(paste("Marker: Lat ", click$lat, "Lng ", click$lng))
   })
   
-  # Button press should show graphs and additional information
-  observeEvent(input$showGraphs, {
-    output$text <- renderText('Button pressed: yes')
+  # Shape click
+  observe({
+    click <- input$map_shape_click
+    if(is.null(click))
+      return()
+    map %>% clearGroup('circles')
+  })
+  
+  # Button Detail Page
+  observeEvent(input$showDetails, {
+    updateNavbarPage(session, "Trashtracking", "Details")
   })
 })

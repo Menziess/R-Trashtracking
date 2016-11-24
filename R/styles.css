@@ -1,4 +1,9 @@
-.outer {
+html {
+  width:100vw;
+  overflow-x:hidden;
+}
+
+.map {
   position: fixed;
   top: 51px;
   left: 0;
@@ -8,6 +13,10 @@
   padding: 0;
 }
 
+.tabel {
+  overflow-y: scroll;
+}
+
 .leaflet-right {
-    display: none;
+  display: none;
 }
