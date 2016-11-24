@@ -57,11 +57,23 @@ shinyServer(function(input, output, session) {
   })
   
   output$locationTypeInput = renderUI({
-    locationTypes <-  c("School" = "school",
-                        "Bar" = "bar",
+    locationTypes <-  c("Afhaalrestaurants" = "meal_takeaway",
                         "Bakkerij" = "bakery",
+                        "Bar" = "bar",
+                        "Bioscoop" = "movie_theater",
                         "Cafe" = "cafe",
-                        "Convenience Store" = "convenience_store")
+                        "Casino" = "casino",
+                        "Dierentuin" = "zoo",
+                        "Kampeerplek" = "campground",
+                        "Museum" = "museum",
+                        "Nachtclub" = "night_club",
+                        "Pretpark" = "amusement_park",
+                        "School" = "school",
+                        "Stadion" = "stadium",
+                        "Tankstation" = "gas_station",
+                        "Universiteit" = "university",
+                        "Warenhuis" = "department_store",
+                        "Winkel" = "Store")
     selectInput("locationType", NULL, locationTypes)
   })
   
