@@ -14,13 +14,7 @@ html {
 }
 
 .tabel {
-  position: fixed;
-  top: 51px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow: scroll;
-  padding: 0;
+  overflow-y: scroll;
 }
 
 .leaflet-right {

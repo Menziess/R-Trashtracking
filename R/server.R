@@ -39,17 +39,14 @@ shinyServer(function(input, output, session) {
   ########################
   
   filteredData <- reactive({
-    t <- trash
     if (!is.null(input$trashType) && input$trashType != 'All') {
-      # t <- t[trash$type == input$trashType, ]
-      t <- subset(t, t$type == input$trashType)
+      trash <- subset(trash, trash$type == input$trashType)
     }
     if (!is.null(input$trashBrand) && input$trashBrand != 'All') {
-      # t <- t[trash$brand == input$trashBrand, ]
-      t <- subset(t, t$brand == input$trashBrand)
+      trash <- subset(trash, trash$brand == input$trashBrand)
     }
     
-    return (t)
+    return (trash)
   })
 
   #######################
@@ -120,7 +117,7 @@ shinyServer(function(input, output, session) {
     click <- input$map_click
     if(is.null(click))
       return()
-    
+
     places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
     nrResults <- length(places$results)
     analyzation <- NULL
@@ -128,13 +125,15 @@ shinyServer(function(input, output, session) {
     if(nrResults == 0) {
       output$text <- renderText(paste("No places found in this area."))
     } else {
-
+      
+      # Flatten places
       places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
       
       # Preperation
       distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
-      trash <- filter(trash, latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
+      trash <- filter(isolate(filteredData()), latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
                       & longitude > click$lng - distanceInLatLng[[2]] & longitude < click$lng + distanceInLatLng[[2]])
+
       # Analyzation
       analyzation <- analyse(trash, places)
       
@@ -172,8 +171,13 @@ shinyServer(function(input, output, session) {
     })
     
     # Informative text
-    output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng))
-    output$locations <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locations found."))
+    output$text <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locations found."))
+    output$story <- renderText(paste(
+      input$locationType, 
+      input$trashType, 
+      input$trashBrand, 
+      input$distanceSlider
+    ))
     
     # Add distance circle
     map %>% 
@@ -196,6 +200,7 @@ shinyServer(function(input, output, session) {
     output$text <- renderText(paste("Marker: Lat ", click$lat, "Lng ", click$lng))
   })
   
+  # Shape click
   observe({
     click <- input$map_shape_click
     if(is.null(click))
