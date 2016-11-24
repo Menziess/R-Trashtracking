@@ -37,23 +37,24 @@ shinyServer(function(input, output, session) {
   filteredData <- reactive({
     t <- trash
     if (!is.null(input$trashType) && input$trashType != 'All') {
-      t <- trash[trash$type == input$trashType, ]
+      t <- t[trash$type == input$trashType, ]
     } 
     if (!is.null(input$trashBrand) && input$trashBrand != 'All') {
-      t <- trash[trash$brand == input$trashBrand, ]
+      t <- t[trash$brand == input$trashBrand, ]
     }
     return (t)
   })
 
   # Trash type  
   output$trashTypeInput = renderUI({
-    names <- as.data.frame.list(distinct(trash, type))
-    selectInput("trashType", NULL, c("All", names))
+    names <- distinct(trash, type)
+    selectInput("trashType", NULL, c("All", as.character(names$type)))
   })
   
   # Trash brand
   output$trashBrandInput = renderUI({
-    selectInput("trashBrand", NULL, c('All', distinct(trash, brand)))
+    names <- distinct(trash, brand)
+    selectInput("trashBrand", NULL, c('All', as.character(names$brand)))
   })
   
   output$locationTypeInput = renderUI({
@@ -117,10 +118,10 @@ shinyServer(function(input, output, session) {
     output$locaties <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locaties gevonden."))
     
     nrResults <- length(places$results)
-    distanceInLatLng <- metersToLatLng(input$distanceSlider)
+    distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
     places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
-    trash <- filter(trash, latitude > click$lat - distanceInLatLng & latitude < click$lat + distanceInLatLng
-                    & longitude > click$lng - distanceInLatLng & longitude < click$lng + distanceInLatLng)
+    trash <- filter(trash, latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
+                    & longitude > click$lng - distanceInLatLng[[2]] & longitude < click$lng + distanceInLatLng[[2]])
     
     # update output
     output$table <- renderDataTable({
