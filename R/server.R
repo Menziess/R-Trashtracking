@@ -37,11 +37,14 @@ shinyServer(function(input, output, session) {
   filteredData <- reactive({
     t <- trash
     if (!is.null(input$trashType) && input$trashType != 'All') {
-      t <- t[trash$type == input$trashType, ]
-    } 
-    if (!is.null(input$trashBrand) && input$trashBrand != 'All') {
-      t <- t[trash$brand == input$trashBrand, ]
+      # t <- t[trash$type == input$trashType, ]
+      t <- subset(t, t$type == input$trashType)
     }
+    if (!is.null(input$trashBrand) && input$trashBrand != 'All') {
+      # t <- t[trash$brand == input$trashBrand, ]
+      t <- subset(t, t$brand == input$trashBrand)
+    }
+    
     return (t)
   })
 
@@ -126,6 +129,12 @@ shinyServer(function(input, output, session) {
     # update output
     output$table <- renderDataTable({
       analyse(trash, places)
+    })
+    
+    output$graph <- renderPlot({
+      d <- analyse(trash, places)
+      d <- as.data.frame(unclass(table(d$place_id, d$n)))
+      plot(d)
     })
     
     output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng))

@@ -52,5 +52,10 @@ shinyUI(navbarPage("Trashtracking",
     div(class="tabel",
       dataTableOutput("table")
     )
+  ),
+  tabPanel("Graph",
+    div(class="graph",
+      plotOutput("graph")
+    )
   )
 ))
