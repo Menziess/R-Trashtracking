@@ -35,19 +35,25 @@ shinyServer(function(input, output, session) {
   
   # Filtered Trash by type and brand
   filteredData <- reactive({
-    trash[trash$type == input$trashType, ]
-    trash[trash$brand == input$trashBrand, ]
+    t <- trash
+    if (!is.null(input$trashType) && input$trashType != 'All') {
+      t <- trash[trash$type == input$trashType, ]
+    } 
+    if (!is.null(input$trashBrand) && input$trashBrand != 'All') {
+      t <- trash[trash$brand == input$trashBrand, ]
+    }
+    return (t)
   })
 
   # Trash type  
   output$trashTypeInput = renderUI({
-    names <- distinct(trash, type)
+    names <- as.data.frame.list(distinct(trash, type))
     selectInput("trashType", NULL, c("All", names))
   })
   
   # Trash brand
   output$trashBrandInput = renderUI({
-    selectInput("trashBrand", NULL, distinct(trash, brand))
+    selectInput("trashBrand", NULL, c('All', distinct(trash, brand)))
   })
   
   output$locationTypeInput = renderUI({
