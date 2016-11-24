@@ -113,15 +113,13 @@ shinyServer(function(input, output, session) {
     
     places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
     
-    if(length(places$resuls) == 0){
+    if(length(places$resuls) == 0) {
       output$locaties <- renderText(paste("Geen locaties gevonden met gebruikte parameters."))
-      leafletProxy("map", data = places) %>%
-        clearGroup("analysis")
     }
     
-    if(length(places$results) > 0){
-<<<<<<< HEAD
-    output$locaties <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locaties gevonden."))
+    if(length(places$results) > 0) {
+      output$locaties <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locaties gevonden."))
+    
     
     nrResults <- length(places$results)
     distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
@@ -129,11 +127,12 @@ shinyServer(function(input, output, session) {
     trash <- filter(trash, latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
                     & longitude > click$lng - distanceInLatLng[[2]] & longitude < click$lng + distanceInLatLng[[2]])
     
-    # update output
+    # Update table
     output$table <- renderDataTable({
       analyse(trash, places)
     })
     
+    # Update graph
     output$graph <- renderPlot({
       d <- analyse(trash, places)
       d <- as.data.frame(unclass(table(d$place_id, d$n)))
@@ -147,7 +146,7 @@ shinyServer(function(input, output, session) {
       iconUrl = "https://lh4.ggpht.com/Tr5sntMif9qOPrKV_UVl7K8A_V3xQDgA7Sw_qweLUFlg76d_vGFA7q1xIKZ6IcmeGqg=w300",
       iconWidth = 38, iconHeight = 40
     )
-    
+
     # Adds google search locations to the map
     leafletProxy("map", data = places) %>%
       clearGroup('analysis') %>%
@@ -156,46 +155,15 @@ shinyServer(function(input, output, session) {
         places$geometry.location.lng, places$geometry.location.lat,
         popup = input$locationType,
         icon = greenLeafIcon
-=======
-      output$locaties <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locaties gevonden."))
-      
-      nrResults <- length(places$results)
-      distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
-      places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
-      trash <- filter(trash, latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
-                      & longitude > click$lng - distanceInLatLng[[2]] & longitude < click$lng + distanceInLatLng[[2]])
-      
-      # update output
-      output$table <- renderDataTable({
-        analyse(trash, places)
-      })
-      
-      output$text <- renderText(paste("Map: Lat ", click$lat, "Lng ", click$lng))
-      
-      # Alternate icon
-      greenLeafIcon <- makeIcon(
-        iconUrl = "https://lh4.ggpht.com/Tr5sntMif9qOPrKV_UVl7K8A_V3xQDgA7Sw_qweLUFlg76d_vGFA7q1xIKZ6IcmeGqg=w300",
-        iconWidth = 38, iconHeight = 40
->>>>>>> dd0f91b4c16fdef0ac725760940600d1a40fa64c
       )
-      # Adds google search locations to the map
-      leafletProxy("map", data = places) %>%
-        clearGroup('analysis') %>%
-        addMarkers(
-          group = 'analysis',
-          places$geometry.location.lng, places$geometry.location.lat,
-          popup = input$locationType,
-          icon = greenLeafIcon
-        )
       
-      if (input$checkboxLocationInput == FALSE){
-        leafletProxy("map", data = places) %>%
-          hideGroup("analysis")
-      }
-      else{
-        leafletProxy("map", data = places) %>%
-          showGroup("analysis")
-      }
+      # if (input$checkboxLocationInput == FALSE){
+      #   leafletProxy("map", data = places) %>%
+      #     hideGroup("analysis")
+      # } else {
+      #   leafletProxy("map", data = places) %>%
+      #     showGroup("analysis")
+      # }
     }
   })
   
