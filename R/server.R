@@ -169,11 +169,13 @@ shinyServer(function(input, output, session) {
       }
     })
     
-    # Update plot
-    output$plot <- renderPlot({
-      if(!is.null(analyzation)) {
-        plot(as.data.frame(unclass(table(analyzation$Place, analyzation$Amount))))  
-      }
+    output$plot <- renderPlotly({
+      plot_ly(analyzation,
+        x = ~Place,
+        y = ~Amount,
+        name = "SF Zoo",
+        type = "bar"
+      )
     })
     
     # Informative text

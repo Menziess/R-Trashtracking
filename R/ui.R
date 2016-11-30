@@ -78,7 +78,7 @@ shinyUI(navbarPage("Trashtracking",
   
   tabPanel("Plot",
     div(class="plot",
-      plotOutput("plot")
+      plotlyOutput("plot")
     )
   )
 ))
