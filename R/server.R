@@ -54,9 +54,9 @@ shinyServer(function(input, output, session) {
   #######################
   
   # date
-  trash["dates"] <- NA
-  trahs$dates <- as.POSIXct(trashdataset$taken, format="%Y-%m-%d")
-  trash$dates <- as.Date(trashdataset$dates, "%d-%m-%y")
+  #trash["dates"] <- NA
+  #trahs$dates <- as.POSIXct(trashdataset$taken, format="%Y-%m-%d")
+  #trash$dates <- as.Date(trashdataset$dates, "%d-%m-%y")
   
   # Trash type  
   output$trashTypeInput = renderUI({
