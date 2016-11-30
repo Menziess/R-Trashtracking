@@ -82,7 +82,7 @@ shinyServer(function(input, output, session) {
                         "Tankstation" = "gas_station",
                         "Universiteit" = "university",
                         "Warenhuis" = "department_store",
-                        "Winkel" = "Store")
+                        "Winkel" = "store")
     selectInput("locationType", NULL, locationTypes)
   })
   
@@ -136,6 +136,7 @@ shinyServer(function(input, output, session) {
 
       # Analyzation
       analyzation <- analyse(trash, places)
+      analyzation$Place <- paste(input$locationType ,seq.int(nrow(analyzation)))
       
       # Alternate icon
       greenLeafIcon <- makeIcon(
@@ -166,7 +167,7 @@ shinyServer(function(input, output, session) {
     # Update plot
     output$plot <- renderPlot({
       if(!is.null(analyzation)) {
-        plot(as.data.frame(unclass(table(analyzation$place_id, analyzation$n))))  
+        plot(as.data.frame(unclass(table(analyzation$Place, analyzation$Amount))))  
       }
     })
     
