@@ -38,3 +38,12 @@ analyse <- function(trash, places) {
 }
 
 total <- analyse(trash, places)
+
+places2 <- radarSearch(lat, lng, rad, 'cafe')
+
+analyzation <- analyse(trash, places)
+analyzation2 <- analyse(trash, places2)
+analyzation$Place <- paste('food' ,seq.int(nrow(analyzation)))
+analyzation2$Place <- paste('cafe' ,seq.int(nrow(analyzation2)))
+
+x<-merge(analyzation, analyzation2, all = T)

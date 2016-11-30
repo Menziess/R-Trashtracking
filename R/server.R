@@ -124,6 +124,8 @@ shinyServer(function(input, output, session) {
       return()
 
     places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
+    places2 <- radarSearch(click$lat, click$lng, input$distanceSlider, 'cafe')
+    
     nrResults <- length(places$results)
     analyzation <- NULL
     
@@ -133,6 +135,7 @@ shinyServer(function(input, output, session) {
       
       # Flatten places
       places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
+      places2 <- do.call(rbind, lapply(places2$results, data.frame, stringsAsFactors=FALSE))
       
       # Preperation
       distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
@@ -141,7 +144,10 @@ shinyServer(function(input, output, session) {
 
       # Analyzation
       analyzation <- analyse(trash, places)
+      analyzation2 <- analyse(trash, places2)
       analyzation$Place <- paste(input$locationType ,seq.int(nrow(analyzation)))
+      analyzation2$Place <- paste('analyse2' ,seq.int(nrow(analyzation2)))
+      analyzation <- merge(analyzation, analyzation2, all=T)
       
       # Alternate icon
       greenLeafIcon <- makeIcon(
@@ -165,7 +171,7 @@ shinyServer(function(input, output, session) {
     # Update table
     output$table <- renderDataTable({
       if(!is.null(analyzation)) {
-        analyzation  
+        analyzation
       }
     })
     
@@ -173,7 +179,7 @@ shinyServer(function(input, output, session) {
       plot_ly(analyzation,
         x = ~Place,
         y = ~Amount,
-        name = "SF Zoo",
+        name = "Plot",
         type = "bar"
       )
     })
