@@ -45,6 +45,9 @@ shinyServer(function(input, output, session) {
     if (!is.null(input$trashBrand) && input$trashBrand != 'All') {
       trash <- subset(trash, trash$brand == input$trashBrand)
     }
+    if (!is.null(input$daterange)) {
+      trash <- subset(trash, as.Date(trash$dates) >= as.Date(input$daterange[1]) & as.Date(trash$dates) <= as.Date(input$daterange[2]))
+    }
     
     return (trash)
   })
@@ -52,11 +55,6 @@ shinyServer(function(input, output, session) {
   #######################
   #       Inputs        #
   #######################
-  
-  # date
-  #trash["dates"] <- NA
-  #trahs$dates <- as.POSIXct(trashdataset$taken, format="%Y-%m-%d")
-  #trash$dates <- as.Date(trashdataset$dates, "%d-%m-%y")
   
   # Trash type  
   output$trashTypeInput = renderUI({

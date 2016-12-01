@@ -34,7 +34,7 @@ shinyUI(navbarPage("Trashtracking",
          
           # Trash  
           h4("Trash"),
-          dateRangeInput("daterange1", NULL,
+          dateRangeInput("daterange", NULL,
                          start = "2015-05-31",
                          end   = "2016-03-15"),
           helpText("Choose type or brand"),
