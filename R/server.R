@@ -46,7 +46,8 @@ shinyServer(function(input, output, session) {
       trash <- subset(trash, trash$brand == input$trashBrand)
     }
     if (!is.null(input$daterange)) {
-      trash <- subset(trash, as.Date(trash$dates) >= as.Date(input$daterange[1]) & as.Date(trash$dates) <= as.Date(input$daterange[2]))
+      trash <- subset(trash, as.Date(trash$dates) >= as.Date(input$daterange[1]) 
+                           & as.Date(trash$dates) <= as.Date(input$daterange[2]))
     }
     
     return (trash)
@@ -122,8 +123,6 @@ shinyServer(function(input, output, session) {
       return()
 
     places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
-    places2 <- radarSearch(click$lat, click$lng, input$distanceSlider, 'cafe')
-    
     nrResults <- length(places$results)
     analyzation <- NULL
     
@@ -133,7 +132,6 @@ shinyServer(function(input, output, session) {
       
       # Flatten places
       places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
-      places2 <- do.call(rbind, lapply(places2$results, data.frame, stringsAsFactors=FALSE))
       
       # Preperation
       distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
@@ -142,10 +140,7 @@ shinyServer(function(input, output, session) {
 
       # Analyzation
       analyzation <- analyse(trash, places)
-      analyzation2 <- analyse(trash, places2)
       analyzation$Place <- paste(input$locationType ,seq.int(nrow(analyzation)))
-      analyzation2$Place <- paste('analyse2' ,seq.int(nrow(analyzation2)))
-      analyzation <- merge(analyzation, analyzation2, all=T)
       
       # Alternate icon
       greenLeafIcon <- makeIcon(
@@ -173,13 +168,31 @@ shinyServer(function(input, output, session) {
       }
     })
     
+    # Update plot
     output$plot <- renderPlotly({
       plot_ly(analyzation,
-        x = ~Place,
-        y = ~Amount,
-        name = "Plot",
-        type = "bar"
+              x = ~Place,
+              y = ~Amount,
+              name = "Top places with trash",
+              type = "bar"
       )
+    })
+    
+    # Update pie
+    output$pie <- renderPlotly({
+      plot_ly(head(trash %>% count(type, sort = T), 10),
+              labels = ~type,
+              values = ~n,
+              name = "Trash distribution",
+              type = "pie"
+      ) %>% 
+      config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+             editable = FALSE, sendData = FALSE, displaylogo = FALSE
+      ) %>%
+      layout(title = 'Temporary floating pie panel',
+             legend = list(x = 100, y = 0.5),
+             xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
     })
     
     # Informative text
