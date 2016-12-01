@@ -27,16 +27,13 @@ shinyUI(navbarPage("Trashtracking",
       ########################
       
       leafletOutput("map", width = "100%", height = "100%"),
-      absolutePanel(class = "panel panel-primary", bottom = -150, right = -40, draggable = T,
+      absolutePanel(class = "panel panel-primary", bottom = 0, left = 10, draggable = T,
         div(class = "panel-heading", "Controls"),
         div(class = "panel-body",
-
          
           # Trash  
           h4("Trash"),
-          dateRangeInput("daterange1", NULL,
-                         start = "2015-05-01",
-                         end   = "2016-03-31"),
+          dateRangeInput("daterange", NULL, start = "2015-05-31", end = "2016-03-15"),
           helpText("Choose type or brand"),
           uiOutput("trashTypeInput"),
           uiOutput("trashBrandInput"),
@@ -49,13 +46,18 @@ shinyUI(navbarPage("Trashtracking",
           sliderInput("distanceSlider", NULL,
                       min = 100, max = 2500, value = 1000),
           checkboxInput("checkboxLocationInput", "Show Places on the map", value = T),
-          hr(), 
+          hr(),
           
           # Button
           actionButton("showDetails", "Show Details")
         ),
         div(class = "panel-footer", 
           textOutput("text")
+        )
+      ),
+      absolutePanel(class = "panel panel-primary", bottom = 0, right = 10, draggable = T,
+        div(class="pie",
+          plotlyOutput("pie")
         )
       )
     )
@@ -78,7 +80,7 @@ shinyUI(navbarPage("Trashtracking",
   
   tabPanel("Plot",
     div(class="plot",
-      plotOutput("plot")
+      plotlyOutput("plot")
     )
   )
 ))

@@ -38,3 +38,20 @@ analyse <- function(trash, places) {
 }
 
 total <- analyse(trash, places)
+
+places2 <- radarSearch(lat, lng, rad, 'cafe')
+
+analyzation <- analyse(trash, places)
+analyzation2 <- analyse(trash, places2)
+analyzation$Place <- paste('food' ,seq.int(nrow(analyzation)))
+analyzation2$Place <- paste('cafe' ,seq.int(nrow(analyzation2)))
+
+x<-merge(analyzation, analyzation2, all = T)
+
+
+trash["dates"] <- NA
+trash$dates <- as.POSIXct(trash$taken, format="%Y-%m-%d")
+trash$dates <- as.Date(trash$dates, "%d-%m-%y")
+
+
+test <- subset(trash, as.Date(trash$dates) >= as.Date("2012-07-22"))

@@ -17,6 +17,10 @@ html {
   overflow-y: scroll;
 }
 
+.pie {
+  margin: 10px;
+}
+
 .leaflet-right {
   display: none;
 }

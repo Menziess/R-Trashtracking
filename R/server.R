@@ -45,6 +45,10 @@ shinyServer(function(input, output, session) {
     if (!is.null(input$trashBrand) && input$trashBrand != 'All') {
       trash <- subset(trash, trash$brand == input$trashBrand)
     }
+    if (!is.null(input$daterange)) {
+      trash <- subset(trash, as.Date(trash$dates) >= as.Date(input$daterange[1]) 
+                           & as.Date(trash$dates) <= as.Date(input$daterange[2]))
+    }
     
     return (trash)
   })
@@ -82,7 +86,7 @@ shinyServer(function(input, output, session) {
                         "Tankstation" = "gas_station",
                         "Universiteit" = "university",
                         "Warenhuis" = "department_store",
-                        "Winkel" = "Store")
+                        "Winkel" = "store")
     selectInput("locationType", NULL, locationTypes)
   })
   
@@ -136,6 +140,7 @@ shinyServer(function(input, output, session) {
 
       # Analyzation
       analyzation <- analyse(trash, places)
+      analyzation$Place <- paste(input$locationType ,seq.int(nrow(analyzation)))
       
       # Alternate icon
       greenLeafIcon <- makeIcon(
@@ -159,15 +164,35 @@ shinyServer(function(input, output, session) {
     # Update table
     output$table <- renderDataTable({
       if(!is.null(analyzation)) {
-        analyzation  
+        analyzation
       }
     })
     
     # Update plot
-    output$plot <- renderPlot({
-      if(!is.null(analyzation)) {
-        plot(as.data.frame(unclass(table(analyzation$place_id, analyzation$n))))  
-      }
+    output$plot <- renderPlotly({
+      plot_ly(analyzation,
+              x = ~Place,
+              y = ~Amount,
+              name = "Top places with trash",
+              type = "bar"
+      )
+    })
+    
+    # Update pie
+    output$pie <- renderPlotly({
+      plot_ly(head(trash %>% count(type, sort = T), 10),
+              labels = ~type,
+              values = ~n,
+              name = "Trash distribution",
+              type = "pie"
+      ) %>% 
+      config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+             editable = FALSE, sendData = FALSE, displaylogo = FALSE
+      ) %>%
+      layout(title = 'Temporary floating pie panel',
+             legend = list(x = 100, y = 0.5),
+             xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
     })
     
     # Informative text
