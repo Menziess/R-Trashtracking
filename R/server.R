@@ -122,99 +122,106 @@ shinyServer(function(input, output, session) {
     if(is.null(click))
       return()
 
-    places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
-    nrResults <- length(places$results)
-    analyzation <- NULL
-    
-    if(nrResults == 0) {
-      output$text <- renderText(paste("No places found in this area."))
-    } else {
+    previousEvent <- "busy"
+    withProgress(message = "Getting Google Places", value = 0, {
+      places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
+      nrResults <- length(places$results)
+      analyzation <- NULL
       
-      # Flatten places
-      places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
-      
-      # Preperation
-      distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
-      trash <- filter(isolate(filteredData()), latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
-                      & longitude > click$lng - distanceInLatLng[[2]] & longitude < click$lng + distanceInLatLng[[2]])
-
-      # Analyzation
-      analyzation <- analyse(trash, places)
-      analyzation$Place <- paste(input$locationType ,seq.int(nrow(analyzation)))
-      
-      # Alternate icon
-      greenLeafIcon <- makeIcon(
-        iconUrl = "https://lh4.ggpht.com/Tr5sntMif9qOPrKV_UVl7K8A_V3xQDgA7Sw_qweLUFlg76d_vGFA7q1xIKZ6IcmeGqg=w300",
-        iconWidth = 38, iconHeight = 40
-      )
-      
-      # Adds google search locations to the map
-      map %>% 
-        clearGroup('analysis') %>%
-        addMarkers(
-          data = places,
-          group = 'analysis',
-          lng = places$geometry.location.lng, 
-          lat = places$geometry.location.lat,
-          popup = input$locationType,
-          icon = greenLeafIcon
+      if(nrResults == 0) {
+        output$text <- renderText(paste("No places found in this area."))
+      } else {
+        
+        # Flatten places
+        places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
+        
+        # Preperation
+        incProgress(1/4, detail = "Filtering Trash")
+        distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
+        trash <- filter(isolate(filteredData()), latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
+                        & longitude > click$lng - distanceInLatLng[[2]] & longitude < click$lng + distanceInLatLng[[2]])
+  
+        # Analyzation
+        incProgress(2/4, detail = "Distance between Trash and Places")
+        analyzation <- analyse(trash, places)
+        analyzation$Place <- paste(input$locationType ,seq.int(nrow(analyzation)))
+        
+        # Alternate icon
+        greenLeafIcon <- makeIcon(
+          iconUrl = "https://lh4.ggpht.com/Tr5sntMif9qOPrKV_UVl7K8A_V3xQDgA7Sw_qweLUFlg76d_vGFA7q1xIKZ6IcmeGqg=w300",
+          iconWidth = 38, iconHeight = 40
         )
-    } 
-    
-    # Update table
-    output$table <- renderDataTable({
-      if(!is.null(analyzation)) {
-        analyzation
+        
+        # Adds google search locations to the map
+        incProgress(3/4, detail = "Drawing Places on the map")
+        map %>% 
+          clearGroup('analysis') %>%
+          addMarkers(
+            data = places,
+            group = 'analysis',
+            lng = places$geometry.location.lng, 
+            lat = places$geometry.location.lat,
+            popup = input$locationType,
+            icon = greenLeafIcon
+          )
+      } 
+      
+      # Update table
+      incProgress(4/4, detail = "Baking piechart")
+      output$table <- renderDataTable({
+        if(!is.null(analyzation)) {
+          analyzation
+        }
+      })
+      
+      # Update plot
+      output$plot <- renderPlotly({
+        plot_ly(analyzation,
+                x = ~Place,
+                y = ~Amount,
+                name = "Top places with trash",
+                type = "bar"
+        )
+      })
+      
+      # Update pie
+      output$pie <- renderPlotly({
+        plot_ly(head(trash %>% count(type, sort = T), 10),
+                labels = ~type,
+                values = ~n,
+                name = "Trash distribution",
+                type = "pie"
+        ) %>% 
+        config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+               editable = FALSE, sendData = FALSE, displaylogo = FALSE
+        ) %>%
+        layout(title = 'Temporary floating pie panel',
+               legend = list(x = 100, y = 0.5),
+               xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+      })
+      
+      # Informative text
+      output$text <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locations found."))
+      output$story <- renderText(paste(
+        input$locationType, 
+        input$trashType, 
+        input$trashBrand, 
+        input$distanceSlider
+      ))
+      
+      # Add distance circle
+      map %>% 
+        clearGroup('circles') %>%
+        addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles")
+      
+      # Hide markers button
+      if (!input$checkboxLocationInput) {
+        map %>% hideGroup("analysis")
+      } else {
+        map %>% showGroup("analysis")
       }
     })
-    
-    # Update plot
-    output$plot <- renderPlotly({
-      plot_ly(analyzation,
-              x = ~Place,
-              y = ~Amount,
-              name = "Top places with trash",
-              type = "bar"
-      )
-    })
-    
-    # Update pie
-    output$pie <- renderPlotly({
-      plot_ly(head(trash %>% count(type, sort = T), 10),
-              labels = ~type,
-              values = ~n,
-              name = "Trash distribution",
-              type = "pie"
-      ) %>% 
-      config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-             editable = FALSE, sendData = FALSE, displaylogo = FALSE
-      ) %>%
-      layout(title = 'Temporary floating pie panel',
-             legend = list(x = 100, y = 0.5),
-             xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-             yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-    })
-    
-    # Informative text
-    output$text <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locations found."))
-    output$story <- renderText(paste(
-      input$locationType, 
-      input$trashType, 
-      input$trashBrand, 
-      input$distanceSlider
-    ))
-    
-    # Add distance circle
-    map %>% 
-      clearGroup('circles') %>%
-      addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles")
-    
-    # Hide markers button
-    if (!input$checkboxLocationInput) {
-      map %>% hideGroup("analysis")
-    } else {
-      map %>% showGroup("analysis")
-    }
   })
   
   # Marker click
