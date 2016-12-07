@@ -153,7 +153,7 @@ shinyServer(function(input, output, session) {
         
         # Alternate icon
         greenLeafIcon <- makeIcon(
-          iconUrl = "https://lh4.ggpht.com/Tr5sntMif9qOPrKV_UVl7K8A_V3xQDgA7Sw_qweLUFlg76d_vGFA7q1xIKZ6IcmeGqg=w300",
+          iconUrl = "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/map-marker-icon.png",
           iconWidth = 38, iconHeight = 40
         )
         
@@ -192,15 +192,17 @@ shinyServer(function(input, output, session) {
           config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
                  editable = FALSE, sendData = FALSE, displaylogo = FALSE
           ) %>%
-          layout(title = 'Trash brands within selected area',
+          layout(title = 'Trash connected to nearby Google Places',
                  legend = list(x = 100, y = 0.5),
                  xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, 
+                 yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE, 
                               zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Update pie
       output$pie_trash_type <- renderPlotly({
+        if(!is.data.frame(analyzation))
+          return()
         plot_ly(head(trash %>% count(type, sort = T), 10),
                 labels = ~type,
                 values = ~n,
@@ -219,6 +221,8 @@ shinyServer(function(input, output, session) {
       
       # Update pie
       output$pie_trash_brand <- renderPlotly({
+        if(!is.data.frame(analyzation))
+          return()
         plot_ly(head(trash %>% count(brand, sort = T), 10),
                 labels = ~brand,
                 values = ~n,
@@ -236,7 +240,7 @@ shinyServer(function(input, output, session) {
       })
       
       # Informative text
-      output$text <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locations found."))
+      output$text <- renderText(paste("Distance: ", input$distanceSlider, " meter. Locations found: ", nrResults, "."))
       output$story <- renderText(paste(
         input$locationType, 
         input$trashType, 
@@ -250,6 +254,8 @@ shinyServer(function(input, output, session) {
         addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles")
       
       output$graphButton <- renderUI({
+        if(!is.data.frame(analyzation))
+          return()
         column(8, align="center",
           actionButton("showStatistics", "Show Statistics", class = "btn-success btn-lg")
         )
@@ -286,7 +292,7 @@ shinyServer(function(input, output, session) {
     if(is.null(click))
       return()
     output$LocationName <- renderPrint({
-      paste("dev: ", click)
+      click
     })
     updateNavbarPage(session, "Trashtracking", "Details")
   })

@@ -20,7 +20,7 @@ shinyUI(navbarPage("Trashtracking",
       column(12, align = "center",
         h1("Scatterplot TODO"),
         plotOutput("scatterplot"),
-        actionButton("showMap", "Show Map", class = "btn-success btn-lg")
+        actionButton("showMap", "Show Map", class = "btn-success btn-lg", style = "margin-top: 2em;")
       )
     )
   ),
@@ -103,12 +103,15 @@ shinyUI(navbarPage("Trashtracking",
   ########################
   
   tabPanel("Details",
-   div(class = "panel-body",
-     h3(textOutput("LocationName")),
-     hr(),
-     textOutput("LocationAdress"),
-     actionButton("showLocationDetails", "Show Location")
-   )
+    column(12, align = "center",
+      h1("Place details")
+    ),
+    div(class = "panel-body",
+      h3(textOutput("LocationName")),
+      hr(),
+      textOutput("LocationAdress"),
+      actionButton("showLocationDetails", "Show Location")
+    )
   ),
   
   ########################
@@ -116,8 +119,11 @@ shinyUI(navbarPage("Trashtracking",
   ########################
   
   tabPanel("</>",
-    div(class="tabel",
-       dataTableOutput("table")
+    column(12, align = "center",
+    h1("Places with trash"),
+      div(class="tabel",
+         dataTableOutput("table")
+      )
     )
   )
 ))
