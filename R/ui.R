@@ -50,7 +50,7 @@ shinyUI(navbarPage("Trashtracking",
           
           # Button
           actionButton("showDetails", "Show Details"),
-          actionButton("ShowLocationDetails", "Show Location")
+          actionButton("showLocationDetails", "Show Location")
         ),
         div(class = "panel-footer", 
           textOutput("text")
