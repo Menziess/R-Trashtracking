@@ -49,7 +49,8 @@ shinyUI(navbarPage("Trashtracking",
           hr(),
           
           # Button
-          actionButton("showDetails", "Show Details")
+          actionButton("showDetails", "Show Details"),
+          actionButton("ShowLocationDetails", "Show Location")
         ),
         div(class = "panel-footer", 
           textOutput("text")
@@ -72,6 +73,18 @@ shinyUI(navbarPage("Trashtracking",
     div(class="tabel",
       dataTableOutput("table")
     )
+  ),
+  
+  ########################
+  #     Details Page     #
+  ########################
+  
+  tabPanel("LocationDetails",
+   div(class = "panel-body",
+       h3(textOutput("LocationName")),
+       hr(),
+       textOutput("LocationAdress")
+   )
   ),
   
   ########################

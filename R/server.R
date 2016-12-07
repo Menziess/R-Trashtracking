@@ -244,4 +244,14 @@ shinyServer(function(input, output, session) {
   observeEvent(input$showDetails, {
     updateNavbarPage(session, "Trashtracking", "Details")
   })
+  
+  # Button Location Detail Page
+  observeEvent(input$showLocationDetails, {
+    locationDetails <- locationSearch("ChIJv_eH87sJxkcRufIWAPR3ro8")
+    
+    output$LocationName <- renderText(paste(locationDetails$result$name))
+    output$LocationAdress <- renderText(paste("Adres" + locationDetails$result$adr_address))
+    
+    updateNavbarPage(session, "Trashtracking", "LocationDetails")
+  })
 })
