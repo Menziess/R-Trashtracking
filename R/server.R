@@ -250,7 +250,7 @@ shinyServer(function(input, output, session) {
     locationDetails <- locationSearch("ChIJv_eH87sJxkcRufIWAPR3ro8")
     
     output$LocationName <- renderText(paste(locationDetails$result$name))
-    output$LocationAdress <- renderText(paste("Adres" + locationDetails$result$adr_address))
+    output$LocationAdress <- renderText(paste("Adress: " + locationDetails$result$formatted_address))
     
     updateNavbarPage(session, "Trashtracking", "LocationDetails")
   })
