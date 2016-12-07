@@ -9,8 +9,26 @@ source('require.R')
 
 shinyUI(navbarPage("Trashtracking", 
   id = "Trashtracking",
+  
+  ########################
+  #      Scatterplot     #
+  ########################
+  
+  tabPanel("Overview",
+    div(class="scatterplot",
+      column(12, align = "center",
+        fluidRow(h1("Scatterplot TODO")),
+        plotOutput("scatterplot"),
+        actionButton("showMap", "Show Map")
+      )
+    )
+  ),
+  
+  ########################
+  #         Map          #
+  ########################
+  
   tabPanel("Map", 
-           
     div(class="map",
         
       ########################
@@ -23,7 +41,7 @@ shinyUI(navbarPage("Trashtracking",
       ),
     
       ########################
-      #      Leaflet Map     #
+      #       Leaflet        #
       ########################
       
       leafletOutput("map", width = "100%", height = "100%"),
@@ -49,7 +67,7 @@ shinyUI(navbarPage("Trashtracking",
           hr(),
           
           # Button
-          actionButton("showDetails", "Show Details"),
+          actionButton("showGraphs", "Show Graphs"),
           actionButton("showLocationDetails", "Show Location")
         ),
         div(class = "panel-footer", 
@@ -65,13 +83,12 @@ shinyUI(navbarPage("Trashtracking",
   ),
   
   ########################
-  #         Table        #
+  #       Graphics      #
   ########################
   
-  tabPanel("Details",
-    h2(textOutput("story")),
-    div(class="tabel",
-      dataTableOutput("table")
+  tabPanel("Graphs",
+    div(class="plot",
+      plotlyOutput("plot")
     )
   ),
   
@@ -79,21 +96,21 @@ shinyUI(navbarPage("Trashtracking",
   #     Details Page     #
   ########################
   
-  tabPanel("LocationDetails",
+  tabPanel("Details",
    div(class = "panel-body",
-       h3(textOutput("LocationName")),
-       hr(),
-       textOutput("LocationAdress")
+     h3(textOutput("LocationName")),
+     hr(),
+     textOutput("LocationAdress")
    )
   ),
   
   ########################
-  #        Graph         #
+  #         Table        #
   ########################
   
-  tabPanel("Plot",
-    div(class="plot",
-      plotlyOutput("plot")
+  tabPanel("</>",
+    div(class="tabel",
+       dataTableOutput("table")
     )
   )
 ))

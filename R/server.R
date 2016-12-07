@@ -57,6 +57,12 @@ shinyServer(function(input, output, session) {
   #       Inputs        #
   #######################
   
+  # Scatterplot
+  output$scatterplot <- renderPlot({
+    # TODO: Zehra
+    plot(ChickWeight)
+  })
+  
   # Trash type  
   output$trashTypeInput = renderUI({
     names <- distinct(trash, type)
@@ -240,9 +246,19 @@ shinyServer(function(input, output, session) {
     map %>% clearGroup('circles')
   })
   
-  # Button Detail Page
-  observeEvent(input$showDetails, {
-    updateNavbarPage(session, "Trashtracking", "Details")
+  
+  ########################
+  #       Buttons        #
+  ########################
+  
+  # Button Map Page
+  observeEvent(input$showMap, {
+    updateNavbarPage(session, "Trashtracking", "Map")
+  })
+  
+  # Button Graphs Page
+  observeEvent(input$showGraphs, {
+    updateNavbarPage(session, "Trashtracking", "Graphs")
   })
   
   # Button Location Detail Page
@@ -252,6 +268,6 @@ shinyServer(function(input, output, session) {
     output$LocationName <- renderText(paste(locationDetails$result$name))
     output$LocationAdress <- renderText(paste("Adress: " + locationDetails$result$formatted_address))
     
-    updateNavbarPage(session, "Trashtracking", "LocationDetails")
+    updateNavbarPage(session, "Trashtracking", "Details")
   })
 })
