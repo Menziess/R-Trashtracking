@@ -128,7 +128,6 @@ shinyServer(function(input, output, session) {
     if(is.null(click))
       return()
 
-    previousEvent <- "busy"
     withProgress(message = "Getting Google Places", value = 0, {
       places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
       nrResults <- length(places$results)
@@ -191,7 +190,7 @@ shinyServer(function(input, output, session) {
       })
       
       # Update pie
-      output$pie <- renderPlotly({
+      output$pie_trash_type <- renderPlotly({
         plot_ly(head(trash %>% count(type, sort = T), 10),
                 labels = ~type,
                 values = ~n,
@@ -201,10 +200,27 @@ shinyServer(function(input, output, session) {
         config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
                editable = FALSE, sendData = FALSE, displaylogo = FALSE
         ) %>%
-        layout(title = 'Temporary floating pie panel',
+        layout(title = 'Trash types within selected area',
                legend = list(x = 100, y = 0.5),
                xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+      })
+      
+      # Update pie
+      output$pie_trash_brand <- renderPlotly({
+        plot_ly(head(trash %>% count(brand, sort = T), 10),
+                labels = ~brand,
+                values = ~n,
+                name = "Trash distribution",
+                type = "pie"
+        ) %>% 
+          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+          ) %>%
+          layout(title = 'Trash brands within selected area',
+                 legend = list(x = 100, y = 0.5),
+                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Informative text

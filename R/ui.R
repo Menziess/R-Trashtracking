@@ -73,11 +73,6 @@ shinyUI(navbarPage("Trashtracking",
         div(class = "panel-footer", 
           textOutput("text")
         )
-      ),
-      absolutePanel(class = "panel panel-primary", bottom = 0, right = 10, draggable = T,
-        div(class="pie",
-          plotlyOutput("pie")
-        )
       )
     )
   ),
@@ -89,6 +84,16 @@ shinyUI(navbarPage("Trashtracking",
   tabPanel("Graphs",
     div(class="plot",
       plotlyOutput("plot")
+    ),
+    column(6,
+      div(class="pie",
+        plotlyOutput("pie_trash_type")
+      )
+    ),
+    column(6,
+      div(class="pie",
+        plotlyOutput("pie_trash_brand")
+      )
     )
   ),
   
