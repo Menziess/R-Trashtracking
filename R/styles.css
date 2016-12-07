@@ -3,12 +3,18 @@ html {
   overflow-x:hidden;
 }
 
+.map, .below {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
 .map {
   position: fixed;
   top: 51px;
   left: 0;
   right: 0;
-  bottom: 0;
+  height: 60%;
   overflow: hidden;
   padding: 0;
 }
@@ -24,3 +30,11 @@ html {
 .leaflet-right {
   display: none;
 }
+
+.below {
+  position: fixed;
+  height: 30%;
+  bottom: 0;
+  overflow:hidden;
+}
+

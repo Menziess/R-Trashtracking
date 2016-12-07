@@ -61,6 +61,11 @@ shinyUI(navbarPage("Trashtracking",
         )
       )
     )
+    ),
+    div(class="below",
+        h4("Google Places")
+    
+    
   ),
   
   ########################
@@ -78,9 +83,9 @@ shinyUI(navbarPage("Trashtracking",
   #        Graph         #
   ########################
   
-  tabPanel("Plot",
-    div(class="plot",
-      plotlyOutput("plot")
-    )
-  )
+  #tabPanel("Plot",
+  #  div(class="plot",
+  #   plotlyOutput("plot")
+  # ))
+  
 ))
