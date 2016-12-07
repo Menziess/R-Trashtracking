@@ -20,7 +20,7 @@ shinyUI(navbarPage("Trashtracking",
       column(12, align = "center",
         h1("Scatterplot TODO"),
         plotOutput("scatterplot"),
-        actionButton("showMap", "Show Map")
+        actionButton("showMap", "Show Map", class = "btn-success btn-lg")
       )
     )
   ),
@@ -64,12 +64,8 @@ shinyUI(navbarPage("Trashtracking",
           helpText("Distance in meters"),
           sliderInput("distanceSlider", NULL,
                       min = 100, max = 2500, value = 1000),
-          checkboxInput("checkboxLocationInput", "Show Places on the map", value = T),
-          hr(),
-          
-          # Button
-          actionButton("showGraphs", "Show Graphs"),
-          actionButton("showLocationDetails", "Show Location")
+          # checkboxInput("checkboxLocationInput", "Show Places on the map", value = T),
+          uiOutput("graphButton")
         ),
         div(class = "panel-footer", 
           textOutput("text")
@@ -79,10 +75,10 @@ shinyUI(navbarPage("Trashtracking",
   ),
   
   ########################
-  #       Graphics      #
+  #      Statistics      #
   ########################
   
-  tabPanel("Graphs",
+  tabPanel("Statistics",
     textOutput("print"),
     column(12, align = "center",
       div(class="plot",
@@ -110,7 +106,8 @@ shinyUI(navbarPage("Trashtracking",
    div(class = "panel-body",
      h3(textOutput("LocationName")),
      hr(),
-     textOutput("LocationAdress")
+     textOutput("LocationAdress"),
+     actionButton("showLocationDetails", "Show Location")
    )
   ),
   

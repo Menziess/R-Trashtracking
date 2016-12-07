@@ -186,7 +186,15 @@ shinyServer(function(input, output, session) {
                 y = ~Amount,
                 name = "Top places with trash",
                 type = "bar"
-        )
+        ) %>% 
+          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+          ) %>%
+          layout(title = 'Trash brands within selected area',
+                 legend = list(x = 100, y = 0.5),
+                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, 
+                              zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Update pie
@@ -203,7 +211,8 @@ shinyServer(function(input, output, session) {
         layout(title = 'Trash types within selected area',
                legend = list(x = 100, y = 0.5),
                xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-               yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+               yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, 
+                            zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Update pie
@@ -220,7 +229,8 @@ shinyServer(function(input, output, session) {
           layout(title = 'Trash brands within selected area',
                  legend = list(x = 100, y = 0.5),
                  xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE , dragmode = FALSE))
+                 yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, 
+                              zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Informative text
@@ -237,12 +247,18 @@ shinyServer(function(input, output, session) {
         clearGroup('circles') %>%
         addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles")
       
-      # Hide markers button
-      if (!input$checkboxLocationInput) {
-        map %>% hideGroup("analysis")
-      } else {
-        map %>% showGroup("analysis")
-      }
+      output$graphButton <- renderUI({
+        column(8, align="center",
+          actionButton("showStatistics", "Show Statistics", class = "btn-success btn-lg")
+        )
+      })
+      
+      # # Hide markers button
+      # if (!input$checkboxLocationInput) {
+      #   map %>% hideGroup("analysis")
+      # } else {
+      #   map %>% showGroup("analysis")
+      # }
     })
   })
   
@@ -283,9 +299,9 @@ shinyServer(function(input, output, session) {
     updateNavbarPage(session, "Trashtracking", "Map")
   })
   
-  # Button Graphs Page
-  observeEvent(input$showGraphs, {
-    updateNavbarPage(session, "Trashtracking", "Graphs")
+  # Button Statistics Page
+  observeEvent(input$showStatistics, {
+    updateNavbarPage(session, "Trashtracking", "Statistics")
   })
   
   # Button Location Detail Page

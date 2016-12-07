@@ -21,6 +21,14 @@ html {
   margin: 10px;
 }
 
+.cursor-crosshair {
+  cursor: pointer !important;
+}
+
+.surface {
+  pointer-events: none !important;
+}
+
 .leaflet-right {
   display: none;
 }
