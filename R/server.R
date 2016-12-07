@@ -181,6 +181,8 @@ shinyServer(function(input, output, session) {
       
       # Update plot
       output$plot <- renderPlotly({
+        if(!is.data.frame(analyzation))
+          return()
         plot_ly(analyzation,
                 x = ~Place,
                 y = ~Amount,
