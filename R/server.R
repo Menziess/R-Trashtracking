@@ -220,7 +220,7 @@ shinyServer(function(input, output, session) {
           layout(title = 'Trash brands within selected area',
                  legend = list(x = 100, y = 0.5),
                  xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+                 yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE , dragmode = FALSE))
       })
       
       # Informative text
@@ -260,6 +260,17 @@ shinyServer(function(input, output, session) {
     if(is.null(click))
       return()
     map %>% clearGroup('circles')
+  })
+  
+  # Barchart click
+  observe({
+    click <- event_data("plotly_click")
+    if(is.null(click))
+      return()
+    output$LocationName <- renderPrint({
+      paste("dev: ", click)
+    })
+    updateNavbarPage(session, "Trashtracking", "Details")
   })
   
   

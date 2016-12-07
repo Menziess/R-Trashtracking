@@ -8,6 +8,7 @@
 source('require.R')
 
 shinyUI(navbarPage("Trashtracking", 
+  theme = shinytheme("flatly"),
   id = "Trashtracking",
   
   ########################
@@ -17,7 +18,7 @@ shinyUI(navbarPage("Trashtracking",
   tabPanel("Overview",
     div(class="scatterplot",
       column(12, align = "center",
-        fluidRow(h1("Scatterplot TODO")),
+        h1("Scatterplot TODO"),
         plotOutput("scatterplot"),
         actionButton("showMap", "Show Map")
       )
@@ -82,8 +83,12 @@ shinyUI(navbarPage("Trashtracking",
   ########################
   
   tabPanel("Graphs",
-    div(class="plot",
-      plotlyOutput("plot")
+    textOutput("print"),
+    column(12, align = "center",
+      div(class="plot",
+        h1("Places with most trash"),
+        plotlyOutput("plot")
+      )
     ),
     column(6,
       div(class="pie",
