@@ -16,9 +16,11 @@ shinyServer(function(input, output, session) {
   ########################
   # Initial Leaflet Map  #
   ########################
+  
+  updateNavbarPage(session, "Trashtracking", "Overview")
 
   output$map <- renderLeaflet({
-    leaflet(trash) %>%
+      leaflet() %>%
       setView(5, 52, 7) %>%
       addProviderTiles("Stamen.TonerLite", 
         options = providerTileOptions(
@@ -26,12 +28,7 @@ shinyServer(function(input, output, session) {
           maxZoom = 18,
           minZoom = 1
         )
-      ) %>%
-      addMarkers(
-        clusterId = 'trash',
-        clusterOptions = markerClusterOptions(), 
-        popup = ~as.character(paste(type, brand))
-      )
+      ) 
   })
   
   ########################
@@ -145,6 +142,7 @@ shinyServer(function(input, output, session) {
         # Analyzation
         incProgress(2/4, detail = "Distance between Trash and Places")
         analyzation <<- analyse(trash, places)
+        browser()
         analyzation$Place <- paste(input$locationType ,seq.int(nrow(analyzation)))
         
         # Alternate icon
@@ -287,7 +285,8 @@ shinyServer(function(input, output, session) {
     if(is.null(click) || !is.data.frame(analyzation))
       return()
     output$LocationName <- renderPrint({
-      analyzation[click$pointNumber + 1,]$id
+      # TODO: Jeffrey
+      analyzation[click$pointNumber + 1,]$Place
     })
     updateNavbarPage(session, "Trashtracking", "Details")
   })

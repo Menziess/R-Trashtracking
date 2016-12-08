@@ -9,6 +9,7 @@ source('require.R')
 
 shinyUI(navbarPage("Trashtracking", 
   theme = shinytheme("flatly"),
+  selected = "Map",
   id = "Trashtracking",
   
   ########################

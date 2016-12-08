@@ -51,8 +51,8 @@ analyse <- function(trash, places) {
   trash$place_id <- places$place_id[apply(matrix, 1, which.min)]  
   trash <- trash %>% count(place_id, sort = TRUE)
   total <- merge(trash, places, by=c("place_id", "place_id")) %>% arrange(desc(n))
-  total <- total[,1:5]
-  colnames(total) <- c("Place", "Amount", "Latitude", "Longitude", "id")
+  total <- total[,1:4]
+  colnames(total) <- c("Place", "Amount", "Latitude", "Longitude")
   
   return (total)
 }
