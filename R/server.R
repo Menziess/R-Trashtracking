@@ -101,6 +101,7 @@ shinyServer(function(input, output, session) {
   #######################
   
   map <- leafletProxy("map")
+  analyzation <- NULL
   
   # Input type changes
   observe({
@@ -131,7 +132,6 @@ shinyServer(function(input, output, session) {
     withProgress(message = "Getting Google Places", value = 0, {
       places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
       nrResults <- length(places$results)
-      analyzation <- NULL
       
       if(nrResults == 0) {
         output$text <- renderText(paste("No places found in this area."))
@@ -148,7 +148,7 @@ shinyServer(function(input, output, session) {
   
         # Analyzation
         incProgress(2/4, detail = "Distance between Trash and Places")
-        analyzation <- analyse(trash, places)
+        analyzation <<- analyse(trash, places)
         analyzation$Place <- paste(input$locationType ,seq.int(nrow(analyzation)))
         
         # Alternate icon
@@ -172,11 +172,11 @@ shinyServer(function(input, output, session) {
       } 
       
       # Update table
-      incProgress(4/4, detail = "Baking piechart")
+      incProgress(4/4, detail = "Baking piecharts")
       output$table <- renderDataTable({
-        if(!is.null(analyzation)) {
-          analyzation
-        }
+        if(!is.data.frame(analyzation))
+          return()
+        analyzation
       })
       
       # Update plot
@@ -191,12 +191,12 @@ shinyServer(function(input, output, session) {
         ) %>% 
           config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
                  editable = FALSE, sendData = FALSE, displaylogo = FALSE
-          ) %>%
-          layout(title = 'Trash connected to nearby Google Places',
-                 legend = list(x = 100, y = 0.5),
-                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE, 
-                              zeroline = FALSE, showticklabels = FALSE))
+        ) %>%
+        layout(title = 'Trash connected to nearby Google Places',
+               # legend = list(x = 100, y = 0.5),
+               xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE, 
+                            zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Update pie
@@ -231,16 +231,16 @@ shinyServer(function(input, output, session) {
         ) %>% 
           config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
                  editable = FALSE, sendData = FALSE, displaylogo = FALSE
-          ) %>%
-          layout(title = 'Trash brands within selected area',
-                 legend = list(x = 100, y = 0.5),
-                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, 
-                              zeroline = FALSE, showticklabels = FALSE))
+        ) %>%
+        layout(title = 'Trash brands within selected area',
+               legend = list(x = 100, y = 0.5),
+               xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, 
+                            zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Informative text
-      output$text <- renderText(paste("Distance: ", input$distanceSlider, " meter. Locations found: ", nrResults, "."))
+      output$text <- renderText(paste0("Distance: ", input$distanceSlider, " meter. Locations found: ", nrResults, "."))
       output$story <- renderText(paste(
         input$locationType, 
         input$trashType, 
@@ -289,10 +289,10 @@ shinyServer(function(input, output, session) {
   # Barchart click
   observe({
     click <- event_data("plotly_click")
-    if(is.null(click))
+    if(is.null(click) || !is.data.frame(analyzation))
       return()
     output$LocationName <- renderPrint({
-      click
+      analyzation[click$pointNumber + 1,]$id
     })
     updateNavbarPage(session, "Trashtracking", "Details")
   })
