@@ -49,7 +49,6 @@ shinyServer(function(input, output, session) {
       trash <- subset(trash, as.Date(trash$dates) >= as.Date(input$daterange[1]) 
                            & as.Date(trash$dates) <= as.Date(input$daterange[2]))
     }
-    
     return (trash)
   })
 
@@ -100,13 +99,10 @@ shinyServer(function(input, output, session) {
   #      Observers      #
   #######################
   
-  map <- leafletProxy("map")
-  analyzation <- NULL
-  
   # Input type changes
   observe({
     input$type
-    map <- leafletProxy("map", data = filteredData()) %>%
+    map <<- leafletProxy("map", data = filteredData()) %>%
       removeMarkerCluster('trash') %>%
       addMarkers(
         clusterId = 'trash',
@@ -193,7 +189,6 @@ shinyServer(function(input, output, session) {
                  editable = FALSE, sendData = FALSE, displaylogo = FALSE
         ) %>%
         layout(title = 'Trash connected to nearby Google Places',
-               # legend = list(x = 100, y = 0.5),
                xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE, 
                             zeroline = FALSE, showticklabels = FALSE))
