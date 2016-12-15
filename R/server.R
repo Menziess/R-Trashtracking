@@ -71,27 +71,6 @@ shinyServer(function(input, output, session) {
     selectInput("trashBrand", NULL, c('All', as.character(names$brand)))
   })
   
-  output$locationTypeInput = renderUI({
-    locationTypes <-  c("Afhaalrestaurants" = "meal_takeaway",
-                        "Bakkerij" = "bakery",
-                        "Bar" = "bar",
-                        "Bioscoop" = "movie_theater",
-                        "Cafe" = "cafe",
-                        "Casino" = "casino",
-                        "Dierentuin" = "zoo",
-                        "Kampeerplek" = "campground",
-                        "Museum" = "museum",
-                        "Nachtclub" = "night_club",
-                        "Pretpark" = "amusement_park",
-                        "School" = "school",
-                        "Stadion" = "stadium",
-                        "Tankstation" = "gas_station",
-                        "Universiteit" = "university",
-                        "Warenhuis" = "department_store",
-                        "Winkel" = "store")
-    selectInput("locationType", NULL, locationTypes)
-  })
-  
   #######################
   #      Observers      #
   #######################
@@ -121,9 +100,14 @@ shinyServer(function(input, output, session) {
     click <- input$map_click
     if(is.null(click))
       return()
-
+    
     withProgress(message = "Getting Google Places", value = 0, {
-      places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
+      school <- radarSearch(click$lat, click$lng, input$distanceSlider, "school")
+      cafe <- radarSearch(click$lat, click$lng, input$distanceSlider, "cafe")
+      takeaway <- radarSearch(click$lat, click$lng, input$distanceSlider, "meal_takeaway")
+      schools <- school
+      restaurants <- c(cafe, takeaway)
+      places <- c(school, cafe, takeaway)
       nrResults <- length(places$results)
       
       if(nrResults == 0) {
@@ -131,6 +115,8 @@ shinyServer(function(input, output, session) {
       } else {
         
         # Flatten places
+        schools <- do.call(rbind, lapply(schools$results, data.frame, stringsAsFactors=FALSE))
+        restaurants <- do.call(rbind, lapply(restaurants$results, data.frame, stringsAsFactors=FALSE))
         places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
         
         # Preperation
@@ -138,7 +124,7 @@ shinyServer(function(input, output, session) {
         distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
         trash <- filter(isolate(filteredData()), latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
                         & longitude > click$lng - distanceInLatLng[[2]] & longitude < click$lng + distanceInLatLng[[2]])
-  
+        
         # Analyzation
         incProgress(2/4, detail = "Distance between Trash and Places")
         analyzation <<- analyse(trash, places)
@@ -149,18 +135,31 @@ shinyServer(function(input, output, session) {
           iconUrl = "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/map-marker-icon.png",
           iconWidth = 38, iconHeight = 40
         )
-        
+        blueLeafIcon <- makeIcon(
+          iconUrl = "http://i.imgur.com/heDEpTw.png",
+          iconWidth = 38, iconHeight = 40
+        )
         # Adds google search locations to the map
         incProgress(3/4, detail = "Drawing Places on the map")
         map %>% 
-          clearGroup('analysis') %>%
+          clearGroup('schoolgroup') %>%
           addMarkers(
-            data = places,
-            group = 'analysis',
-            lng = places$geometry.location.lng, 
-            lat = places$geometry.location.lat,
-            popup = input$locationType,
+            data = schools,
+            group = 'schoolgroup',
+            lng = schools$geometry.location.lng, 
+            lat = schools$geometry.location.lat,
+            popup = "School",
             icon = greenLeafIcon
+          )
+        map %>%
+          clearGroup('restaurantgroup') %>%
+          addMarkers(
+            data = restaurants,
+            group = 'restaurantgroup',
+            lng = restaurants$geometry.location.lng, 
+            lat = restaurants$geometry.location.lat,
+            popup = "Restaurant",
+            icon = blueLeafIcon
           )
       } 
       
@@ -234,7 +233,6 @@ shinyServer(function(input, output, session) {
       # Informative text
       output$text <- renderText(paste0("Distance: ", input$distanceSlider, " meter. Locations found: ", nrResults, "."))
       output$story <- renderText(paste(
-        input$locationType, 
         input$trashType, 
         input$trashBrand, 
         input$distanceSlider
