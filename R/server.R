@@ -106,19 +106,19 @@ shinyServer(function(input, output, session) {
       cafe <- radarSearch(click$lat, click$lng, input$distanceSlider, "cafe")
       takeaway <- radarSearch(click$lat, click$lng, input$distanceSlider, "meal_takeaway")
       university <- radarSearch(click$lat, click$lng, input$distanceSlider, "university")
-      schools <- c(school, university)
-      restaurants <- c(cafe, takeaway)
-      places <- c(school, cafe, takeaway)
-      nrResults <- length(places$results)
+      schools <- c(school$results, university$results)
+      restaurants <- c(cafe$results, takeaway$results)
+      places <- c(school$results, cafe$results, takeaway$results, university$results)
+      nrResults <- length(places)
       
       if(nrResults == 0) {
         output$text <- renderText(paste("No places found in this area."))
       } else {
         
         # Flatten places
-        schools <- do.call(rbind, lapply(schools$results, data.frame, stringsAsFactors=FALSE))
-        restaurants <- do.call(rbind, lapply(restaurants$results, data.frame, stringsAsFactors=FALSE))
-        places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
+        schools <- do.call(rbind, lapply(schools, data.frame, stringsAsFactors=FALSE))
+        restaurants <- do.call(rbind, lapply(restaurants, data.frame, stringsAsFactors=FALSE))
+        places <- do.call(rbind, lapply(places, data.frame, stringsAsFactors=FALSE))
         
         # Preperation
         incProgress(1/4, detail = "Filtering Trash")
@@ -129,7 +129,6 @@ shinyServer(function(input, output, session) {
         # Analyzation
         incProgress(2/4, detail = "Distance between Trash and Places")
         analyzation <<- analyse(trash, places)
-        analyzation$Place <- paste(input$locationType ,seq.int(nrow(analyzation)))
         
         # Alternate icon
         greenLeafIcon <- makeIcon(
