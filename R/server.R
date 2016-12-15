@@ -246,9 +246,9 @@ shinyServer(function(input, output, session) {
       output$graphButton <- renderUI({
         if(!is.data.frame(analyzation))
           return()
-        column(8, align="center",
-          actionButton("showStatistics", "Show Statistics", class = "btn-success btn-lg")
-        )
+        # column(8, align="center",
+          actionButton("showStatistics", "stats", class = "btn btn-success pull-right", style = "margin-left: 0.5em;")
+        # )
       })
       
       # # Hide markers button
