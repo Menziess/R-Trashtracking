@@ -141,26 +141,37 @@ shinyServer(function(input, output, session) {
         )
         # Adds google search locations to the map
         incProgress(3/4, detail = "Drawing Places on the map")
-        map %>% 
-          clearGroup('schoolgroup') %>%
-          addMarkers(
-            data = schools,
-            group = 'schoolgroup',
-            lng = schools$geometry.location.lng, 
-            lat = schools$geometry.location.lat,
-            popup = "School",
-            icon = greenLeafIcon
-          )
-        map %>%
-          clearGroup('restaurantgroup') %>%
-          addMarkers(
-            data = restaurants,
-            group = 'restaurantgroup',
-            lng = restaurants$geometry.location.lng, 
-            lat = restaurants$geometry.location.lat,
-            popup = "Restaurant",
-            icon = blueLeafIcon
-          )
+        if (length(schools) > 0){
+          map %>% 
+            clearGroup('schoolgroup') %>%
+            addMarkers(
+              data = schools,
+              group = 'schoolgroup',
+              lng = schools$geometry.location.lng, 
+              lat = schools$geometry.location.lat,
+              popup = "School",
+              icon = greenLeafIcon
+            )
+        } else
+        {
+          map %>%
+            clearGroup('schoolgroup')
+        }
+        if (length(restaurants) > 0){
+          map %>%
+            clearGroup('restaurantgroup') %>%
+            addMarkers(
+              data = restaurants,
+              group = 'restaurantgroup',
+              lng = restaurants$geometry.location.lng, 
+              lat = restaurants$geometry.location.lat,
+              popup = "Restaurant",
+              icon = blueLeafIcon
+            )
+        } else {
+          map %>%
+            clearGroup('restaurantgroup')
+        }
       } 
       
       # Update table
