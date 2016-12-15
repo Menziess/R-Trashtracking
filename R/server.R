@@ -54,11 +54,6 @@ shinyServer(function(input, output, session) {
   #######################
   
   # Scatterplot
-  output$scatterplot <- renderPlot({
-    # TODO: Zehra
-    plot(ChickWeight)
-  })
-  
   # Trash type  
   output$trashTypeInput = renderUI({
     names <- distinct(trash, type)
@@ -184,12 +179,16 @@ shinyServer(function(input, output, session) {
         ) %>% 
           config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
                  editable = FALSE, sendData = FALSE, displaylogo = FALSE
-        ) %>%
-        layout(title = 'Trash connected to nearby Google Places',
-               xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-               yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE, 
-                            zeroline = FALSE, showticklabels = FALSE))
+          )
       })
+                 #)%>%
+          
+        #layout(title = 'Trash connected to nearby Google Places',
+              #xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+              #yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE, 
+                            #zeroline = FALSE, showticklabels = FALSE))
+  
+      
       
       # Update pie
       output$pie_trash_type <- renderPlotly({

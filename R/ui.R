@@ -17,13 +17,9 @@ shinyUI(navbarPage("Trashtracking",
   ########################
   
   tabPanel("Overview",
-    div(class="scatterplot",
-      column(12, align = "center",
-        h1("Scatterplot TODO"),
-        plotOutput("scatterplot"),
-        actionButton("showMap", "Show Map", class = "btn-success btn-lg", style = "margin-top: 2em;")
-      )
-    )
+          includeCSS("styles.css"),
+          class = "overview",
+          source('trash_overview.R')
   ),
   
   ########################
@@ -75,30 +71,29 @@ shinyUI(navbarPage("Trashtracking",
     )
     ),
     div(class="below",
-        h4("Google Places")
-    
-    
-  ),
+             plotlyOutput("plot")
+            ),
+         
   
   ########################
   #      Statistics      #
   ########################
   
-  tabPanel("Statistics",
+   tabPanel("Statistics",
     textOutput("print"),
-    column(12, align = "center",
-      div(class="plot",
-        h1("Places with most trash"),
-        plotlyOutput("plot")
-      )
-    ),
+  # column(12, align = "center",
+  #   div(class="plot",
+  #     h1("Places with most trash"),
+  #     plotlyOutput("plot")
+  #    )
+  # ),
+   column(6,
+     div(class="pie",
+       plotlyOutput("pie_trash_type")
+     )
+   ),
     column(6,
-      div(class="pie",
-        plotlyOutput("pie_trash_type")
-      )
-    ),
-    column(6,
-      div(class="pie",
+     div(class="pie",
         plotlyOutput("pie_trash_brand")
       )
     )
@@ -139,3 +134,4 @@ shinyUI(navbarPage("Trashtracking",
     )
   )
 ))
+
