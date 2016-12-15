@@ -41,15 +41,15 @@ locationSearch <- function(placeid) {
 
 # API response analysis function to associate trash with places
 analyse <- function(trash, places) {
-  if(nrow(trash) < 1 || nrow(places) < 1) return(NULL)
+  if(nrow(trash) < 1 || nrow(places) < 1) return (NULL)
   matrix <- distm(
     trash[,c('longitude','latitude')], 
     places[,c('geometry.location.lng','geometry.location.lat')], 
     fun=distVincentyEllipsoid
   )
-  
+
   trash$place_id <- places$place_id[apply(matrix, 1, which.min)]  
-  trash <- trash %>% count("place_id", sort = TRUE)
+  trash <- trash %>% count(place_id, sort = T)
   total <- merge(trash, places, by=c("place_id", "place_id")) %>% arrange(desc(n))
   total <- total[,1:4]
   colnames(total) <- c("Place", "Amount", "Latitude", "Longitude")

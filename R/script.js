@@ -9,7 +9,7 @@ function openSidebar() {
   sidebar = document.getElementById("collapse_sidebar");
   content = document.getElementById("sidebar_content");
   if (sidebar.style.width == "35em") {
-    sidebar.style.width = "3em";
+    sidebar.style.width = "5em";
     content.style.display = "none";
   } else {
     sidebar.style.width = "35em";

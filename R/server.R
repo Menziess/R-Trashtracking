@@ -138,6 +138,7 @@ shinyServer(function(input, output, session) {
         schools <- do.call(rbind, lapply(schools, data.frame, stringsAsFactors=FALSE))
         restaurants <- do.call(rbind, lapply(restaurants, data.frame, stringsAsFactors=FALSE))
         places <- do.call(rbind, lapply(places, data.frame, stringsAsFactors=FALSE))
+        # places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
         
         # Preperation
         incProgress(1/4, detail = "Filtering Trash")
@@ -158,6 +159,7 @@ shinyServer(function(input, output, session) {
           iconUrl = "http://i.imgur.com/heDEpTw.png",
           iconWidth = 38, iconHeight = 40
         )
+        
         # Adds google search locations to the map
         incProgress(3/4, detail = "Drawing Places on the map")
         if (length(schools) > 0){
@@ -171,8 +173,7 @@ shinyServer(function(input, output, session) {
               popup = "School",
               icon = greenLeafIcon
             )
-        } else
-        {
+        } else {
           map %>%
             clearGroup('schoolgroup')
         }
@@ -218,6 +219,25 @@ shinyServer(function(input, output, session) {
                xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE,
                             zeroline = FALSE, showticklabels = FALSE))
+      })
+      
+      # Update Places Large Barchart
+      output$large_plot <- renderPlotly({
+        if(!is.data.frame(analyzation))
+          return()
+        plot_ly(analyzation,
+                x = ~Place,
+                y = ~Amount,
+                name = "Top places with trash",
+                type = "bar"
+        ) %>% 
+          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+          ) %>%
+          layout(title = 'Trash connected to nearby Google Places',
+                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE,
+                              zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Update Type Piechart
@@ -276,9 +296,7 @@ shinyServer(function(input, output, session) {
       output$graphButton <- renderUI({
         if(!is.data.frame(analyzation))
           return()
-        # column(8, align="center",
-          actionButton("showStatistics", "stats", class = "btn btn-success pull-right", style = "margin-left: 0.5em;")
-        # )
+          actionButton("showStatistics", HTML("&#10064;"), class = "btn btn-success", style="height: 2.8em")
       })
       
       # # Hide markers button
@@ -309,33 +327,22 @@ shinyServer(function(input, output, session) {
   # Barchart click
   observe({
     click <- event_data("plotly_click")
+    
     if(is.null(click) || !is.data.frame(analyzation))
       return()
-    locationDetails <- locationSearch(analyzation[click$pointNumber + 1,]$Place)
-    output$LocationName <- renderText(
-      paste(locationDetails$result$name)
-    )
-    output$LocationAdress <- renderText(
-      paste("Adress: ", locationDetails$result$formatted_address)
-    )
-    if (is.null(locationDetails$result$formatted_phone_number)){
-      output$LocationPhone <- renderText(
-        paste("Phonenumber: Not Available")
-      )
-    } else {
-      output$LocationPhone <- renderText(
-        paste("Phonenumber: ", locationDetails$result$formatted_phone_number)
-      )
-    }
-    if (is.null(locationDetails$result$website)){
-      output$LocationWebsite <- renderText(
-        paste("Website: Not Available")
-      )
-    } else {
-      output$LocationWebsite <- renderText(
-        paste("Website: ", locationDetails$result$website)
-      )
-    }
+    response <- locationSearch(click$x)
+    output$details <- renderUI({
+      HTML(paste0(
+        '<hr />',
+        '<h3>', response$result$name, '</h3>',
+        '<img src="', response$result$icon, '" style="height:3em;position:absolute;transform:translate(-4em,-3em);" />',
+        '<p><strong>Address:&nbsp </strong>', response$result$formatted_address, '</p>',
+        '<p><strong>Phone:&nbsp </strong>', response$result$formatted_phone_number, '</p>',
+        '<p><strong>Website:&nbsp </strong><a href="', response$result$website, '">', response$result$website, '</a></p>',
+        '<p><strong>Rating:&nbsp </strong>', response$result$rating, '</p>',
+        '<hr />'
+      ))
+    })
     updateNavbarPage(session, "Trashtracking", "Details")
   })
   

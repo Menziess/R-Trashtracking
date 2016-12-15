@@ -13,11 +13,10 @@ shinyUI(navbarPage("Trashtracking",
   id = "Trashtracking",
   
   ########################
-  #      Scatterplot     #
+  #       Overview      #
   ########################
   
   tabPanel("Overview",
-    # source('trash_overview.R'),
     div(class="scatterplot",
       column(12, align = "center",
              h4("Thanks to the trash hunters we know.."),
@@ -54,9 +53,9 @@ shinyUI(navbarPage("Trashtracking",
       absolutePanel(class = "panel panel-primary", style = "width: 20em;", left = 10, bottom = 0, draggable = F,
         div(class = "panel-heading", "Controls",
           div(style="margin-top: 0px;",
-            uiOutput("graphButton"),
-            HTML('<button class="btn btn-info pull-right" data-toggle="collapse" data-target="#collapse_controls">
-                &#9887;</button>')
+            HTML('<button class="btn btn-primary" style="top:0;right:0;position:absolute;height:2.7em;" 
+                  data-toggle="collapse" data-target="#collapse_controls">
+                   &#10010;</button>')
           )
         ),
         div(class = "panel-body",
@@ -86,13 +85,14 @@ shinyUI(navbarPage("Trashtracking",
     ),
     
     # Sidebar
-    absolutePanel(id="collapse_sidebar", class = "panel panel-primary", top = "3.7em", right = 0, style = "width: 3em; height: 100%; position: fixed;",
-      div(class="panel-body", style="background-color: white; height:100%; display: block",
+    absolutePanel(id="collapse_sidebar", class = "panel panel-primary", top = "3.7em", right = 0, style = "width: 5em; height: 100%; position: fixed;",
+      div(class="panel-body", style="height:100%; display: block",
         div(bottom=0,
-          HTML('<button class="btn btn-info" onClick="openSidebar()">
-              &#9886;</button>')
+          HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
+                &#10010;</button>'),
+          uiOutput("graphButton")
         ),
-        div(id="sidebar_content",
+        div(id="sidebar_content", style="display: none",
           helpText("Lorem ipsum dolor sit amet, per eius ullum ne, per ea eligendi voluptatum. Ad suas menandri eum, at per movet utinam, at iriure omittam mel. Novum dolor ocurreret mea ad, modo augue feugait est ne. Per ad error tritani. Ius ignota legendos disputando et. Ad cum corpora luptatum hendrerit, qui cu saperet percipit persequeris. Per inani dicam utroque ea. Ei agam libris cum, te esse laboramus nec, ex quo eripuit maiorum. Te has delectus periculis, eu assum populo commune eos. Sit no nonumy aliquip scripserit, ex eripuit blandit facilisi duo. Ut usu repudiare intellegat, te sit augue dicta equidem. In mel libris impedit deserunt. Vix maiorum splendide at, has et error movet qualisque. Qui eu sanctus minimum placerat, facer verterem intellegat id mel. Munere dissentiet consequuntur nec eu, et aeque iusto ocurreret sit, eam error molestie maluisset ut. An vitae referrentur usu. In tibique postulant repudiandae qui, ea vis utamur salutatus urbanitas. His dolores copiosae inciderint in, eam legimus honestatis mediocritatem at. Audiam impedit quo an, pri duis aperiam moderatius cu, nec exerci cetero corpora te. Est mucius mandamus ne."),
           plotlyOutput("plot")
         )
@@ -110,7 +110,7 @@ shinyUI(navbarPage("Trashtracking",
       div(class="plot",
         h4("Trash information of the selected area"),
         conditionalPanel(
-          condition="!output.plot",
+          condition="!output.large_plot",
           helpText("Oops! Sorry we can not show statistics if you don't select an area first.
                    Please go to back to the map-tab and click on the place you would
                    like to see statistics about, then click on the Stats button."),
@@ -118,22 +118,13 @@ shinyUI(navbarPage("Trashtracking",
         ),
         plotlyOutput("large_plot")
       ),
-      h4("Place details"),
       conditionalPanel(
-        condition="!output.locationDetails",
-        helpText("Oops! Sorry we can not show any details if you don't 
-                 select a accommodation in the statistics tab first.
-                 Please go back to the statistics-tab and click on the graph on the
-                 place you would like to know the details about.")
+        condition="output.large_plot && !output.details",
+        helpText("Click on a bar to see the details.")
       ),
-      conditionalPanel(
-        condition="output.locationDetails",
-        div(class = "panel-body",
-           h3(textOutput("LocationName")),
-           hr(),
-           textOutput("LocationAdress"),
-           textOutput("LocationPhone"),
-           textOutput("LocationWebsite")
+      column(6, align = "center", style = "margin-left: 32%;", 
+        div(class = "panel-body text-left",
+          htmlOutput("details")
         )
       )
     ),
