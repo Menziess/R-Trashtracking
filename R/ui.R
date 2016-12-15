@@ -8,9 +8,29 @@
 source('require.R')
 
 shinyUI(navbarPage("Trashtracking", 
+  theme = shinytheme("flatly"),
+  selected = "Map",
   id = "Trashtracking",
+  
+  ########################
+  #      Scatterplot     #
+  ########################
+  
+  tabPanel("Overview",
+    div(class="scatterplot",
+      column(12, align = "center",
+        h1("Scatterplot TODO"),
+        plotOutput("scatterplot"),
+        actionButton("showMap", "Show Map", class = "btn-success btn-lg", style = "margin-top: 2em;")
+      )
+    )
+  ),
+  
+  ########################
+  #         Map          #
+  ########################
+  
   tabPanel("Map", 
-           
     div(class="map",
         
       ########################
@@ -23,7 +43,7 @@ shinyUI(navbarPage("Trashtracking",
       ),
     
       ########################
-      #      Leaflet Map     #
+      #       Leaflet        #
       ########################
       
       leafletOutput("map", width = "100%", height = "100%"),
@@ -45,19 +65,11 @@ shinyUI(navbarPage("Trashtracking",
           helpText("Distance in meters"),
           sliderInput("distanceSlider", NULL,
                       min = 100, max = 2500, value = 1000),
-          checkboxInput("checkboxLocationInput", "Show Places on the map", value = T),
-          hr(),
-          
-          # Button
-          actionButton("showDetails", "Show Details")
+          # checkboxInput("checkboxLocationInput", "Show Places on the map", value = T),
+          uiOutput("graphButton")
         ),
         div(class = "panel-footer", 
           textOutput("text")
-        )
-      ),
-      absolutePanel(class = "panel panel-primary", bottom = 0, right = 10, draggable = T,
-        div(class="pie",
-          plotlyOutput("pie")
         )
       )
     )
@@ -69,23 +81,61 @@ shinyUI(navbarPage("Trashtracking",
   ),
   
   ########################
-  #         Table        #
+  #      Statistics      #
   ########################
   
-  tabPanel("Details",
-    h2(textOutput("story")),
-    div(class="tabel",
-      dataTableOutput("table")
+  tabPanel("Statistics",
+    textOutput("print"),
+    column(12, align = "center",
+      div(class="plot",
+        h1("Places with most trash"),
+        plotlyOutput("plot")
+      )
+    ),
+    column(6,
+      div(class="pie",
+        plotlyOutput("pie_trash_type")
+      )
+    ),
+    column(6,
+      div(class="pie",
+        plotlyOutput("pie_trash_brand")
+      )
     )
   ),
   
   ########################
-  #        Graph         #
+  #     Details Page     #
   ########################
   
+  tabPanel("Details",
+    column(12, align = "center",
+      h1("Place details")
+    ),
+    div(class = "panel-body",
+      h3(textOutput("LocationName")),
+      hr(),
+      textOutput("LocationAdress"),
+      actionButton("showLocationDetails", "Show Location")
+    )
+  ),
+  
+  ########################
+  #         Table        #
+  ########################
+  
+
   #tabPanel("Plot",
   #  div(class="plot",
   #   plotlyOutput("plot")
   # ))
   
+  tabPanel("</>",
+    column(12, align = "center",
+    h1("Places with trash"),
+      div(class="tabel",
+         dataTableOutput("table")
+      )
+    )
+  )
 ))

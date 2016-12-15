@@ -16,9 +16,11 @@ shinyServer(function(input, output, session) {
   ########################
   # Initial Leaflet Map  #
   ########################
+  
+  updateNavbarPage(session, "Trashtracking", "Overview")
 
   output$map <- renderLeaflet({
-    leaflet(trash) %>%
+      leaflet() %>%
       setView(5, 52, 7) %>%
       addProviderTiles("Stamen.TonerLite", 
         options = providerTileOptions(
@@ -26,12 +28,7 @@ shinyServer(function(input, output, session) {
           maxZoom = 18,
           minZoom = 1
         )
-      ) %>%
-      addMarkers(
-        clusterId = 'trash',
-        clusterOptions = markerClusterOptions(), 
-        popup = ~as.character(paste(type, brand))
-      )
+      ) 
   })
   
   ########################
@@ -49,13 +46,18 @@ shinyServer(function(input, output, session) {
       trash <- subset(trash, as.Date(trash$dates) >= as.Date(input$daterange[1]) 
                            & as.Date(trash$dates) <= as.Date(input$daterange[2]))
     }
-    
     return (trash)
   })
 
   #######################
   #       Inputs        #
   #######################
+  
+  # Scatterplot
+  output$scatterplot <- renderPlot({
+    # TODO: Zehra
+    plot(ChickWeight)
+  })
   
   # Trash type  
   output$trashTypeInput = renderUI({
@@ -94,12 +96,10 @@ shinyServer(function(input, output, session) {
   #      Observers      #
   #######################
   
-  map <- leafletProxy("map")
-  
   # Input type changes
   observe({
     input$type
-    map <- leafletProxy("map", data = filteredData()) %>%
+    map <<- leafletProxy("map", data = filteredData()) %>%
       removeMarkerCluster('trash') %>%
       addMarkers(
         clusterId = 'trash',
@@ -122,11 +122,9 @@ shinyServer(function(input, output, session) {
     if(is.null(click))
       return()
 
-    previousEvent <- "busy"
     withProgress(message = "Getting Google Places", value = 0, {
       places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
       nrResults <- length(places$results)
-      analyzation <- NULL
       
       if(nrResults == 0) {
         output$text <- renderText(paste("No places found in this area."))
@@ -143,12 +141,12 @@ shinyServer(function(input, output, session) {
   
         # Analyzation
         incProgress(2/4, detail = "Distance between Trash and Places")
-        analyzation <- analyse(trash, places)
+        analyzation <<- analyse(trash, places)
         analyzation$Place <- paste(input$locationType ,seq.int(nrow(analyzation)))
         
         # Alternate icon
         greenLeafIcon <- makeIcon(
-          iconUrl = "https://lh4.ggpht.com/Tr5sntMif9qOPrKV_UVl7K8A_V3xQDgA7Sw_qweLUFlg76d_vGFA7q1xIKZ6IcmeGqg=w300",
+          iconUrl = "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/map-marker-icon.png",
           iconWidth = 38, iconHeight = 40
         )
         
@@ -167,25 +165,36 @@ shinyServer(function(input, output, session) {
       } 
       
       # Update table
-      incProgress(4/4, detail = "Baking piechart")
+      incProgress(4/4, detail = "Baking piecharts")
       output$table <- renderDataTable({
-        if(!is.null(analyzation)) {
-          analyzation
-        }
+        if(!is.data.frame(analyzation))
+          return()
+        analyzation
       })
       
       # Update plot
       output$plot <- renderPlotly({
+        if(!is.data.frame(analyzation))
+          return()
         plot_ly(analyzation,
                 x = ~Place,
                 y = ~Amount,
                 name = "Top places with trash",
                 type = "bar"
-        )
+        ) %>% 
+          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+        ) %>%
+        layout(title = 'Trash connected to nearby Google Places',
+               xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE, 
+                            zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Update pie
-      output$pie <- renderPlotly({
+      output$pie_trash_type <- renderPlotly({
+        if(!is.data.frame(analyzation))
+          return()
         plot_ly(head(trash %>% count(type, sort = T), 10),
                 labels = ~type,
                 values = ~n,
@@ -195,14 +204,35 @@ shinyServer(function(input, output, session) {
         config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
                editable = FALSE, sendData = FALSE, displaylogo = FALSE
         ) %>%
-        layout(title = 'Temporary floating pie panel',
+        layout(title = 'Trash types within selected area',
                legend = list(x = 100, y = 0.5),
                xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-               yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+               yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, 
+                            zeroline = FALSE, showticklabels = FALSE))
+      })
+      
+      # Update pie
+      output$pie_trash_brand <- renderPlotly({
+        if(!is.data.frame(analyzation))
+          return()
+        plot_ly(head(trash %>% count(brand, sort = T), 10),
+                labels = ~brand,
+                values = ~n,
+                name = "Trash distribution",
+                type = "pie"
+        ) %>% 
+          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+        ) %>%
+        layout(title = 'Trash brands within selected area',
+               legend = list(x = 100, y = 0.5),
+               xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, 
+                            zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Informative text
-      output$text <- renderText(paste("Distance: ", input$distanceSlider, " meter. ", nrResults, "locations found."))
+      output$text <- renderText(paste0("Distance: ", input$distanceSlider, " meter. Locations found: ", nrResults, "."))
       output$story <- renderText(paste(
         input$locationType, 
         input$trashType, 
@@ -215,12 +245,20 @@ shinyServer(function(input, output, session) {
         clearGroup('circles') %>%
         addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles")
       
-      # Hide markers button
-      if (!input$checkboxLocationInput) {
-        map %>% hideGroup("analysis")
-      } else {
-        map %>% showGroup("analysis")
-      }
+      output$graphButton <- renderUI({
+        if(!is.data.frame(analyzation))
+          return()
+        column(8, align="center",
+          actionButton("showStatistics", "Show Statistics", class = "btn-success btn-lg")
+        )
+      })
+      
+      # # Hide markers button
+      # if (!input$checkboxLocationInput) {
+      #   map %>% hideGroup("analysis")
+      # } else {
+      #   map %>% showGroup("analysis")
+      # }
     })
   })
   
@@ -240,8 +278,40 @@ shinyServer(function(input, output, session) {
     map %>% clearGroup('circles')
   })
   
-  # Button Detail Page
-  observeEvent(input$showDetails, {
+  # Barchart click
+  observe({
+    click <- event_data("plotly_click")
+    if(is.null(click) || !is.data.frame(analyzation))
+      return()
+    output$LocationName <- renderPrint({
+      # TODO: Jeffrey
+      analyzation[click$pointNumber + 1,]$Place
+    })
+    updateNavbarPage(session, "Trashtracking", "Details")
+  })
+  
+  
+  ########################
+  #       Buttons        #
+  ########################
+  
+  # Button Map Page
+  observeEvent(input$showMap, {
+    updateNavbarPage(session, "Trashtracking", "Map")
+  })
+  
+  # Button Statistics Page
+  observeEvent(input$showStatistics, {
+    updateNavbarPage(session, "Trashtracking", "Statistics")
+  })
+  
+  # Button Location Detail Page
+  observeEvent(input$showLocationDetails, {
+    locationDetails <- locationSearch("ChIJv_eH87sJxkcRufIWAPR3ro8")
+    
+    output$LocationName <- renderText(paste(locationDetails$result$name))
+    output$LocationAdress <- renderText(paste("Adress: " + locationDetails$result$formatted_address))
+    
     updateNavbarPage(session, "Trashtracking", "Details")
   })
 })

@@ -31,6 +31,14 @@ radarSearch <- function(latitude = 0, longitude = 0, radius = 100, type = NULL, 
   return (content(r, "parsed"))
 }
 
+#The Google Places API Location Search Service allows you to search for a location and get all the details from Google.
+locationSearch <- function(placeid) {
+  if (is.null(placeid))
+    stop('Missing required parameter "placeid"')
+  tryCatch(r <- GET("https://maps.googleapis.com/maps/api/place/details/json?", query = list(placeid=placeid, key=googleKey)))
+  return (content(r, "parsed"))
+}
+
 # API response analysis function to associate trash with places
 analyse <- function(trash, places) {
   if(nrow(trash) < 1 || nrow(places) < 1) return(NULL)

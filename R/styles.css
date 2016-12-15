@@ -17,14 +17,28 @@ html {
   height: 60%;
   overflow: hidden;
   padding: 0;
+  background-color: whitesmoke;
 }
 
 .tabel {
-  overflow-y: scroll;
+  overflow-y: auto;
+  overflow-x: scroll;
 }
 
 .pie {
   margin: 10px;
+}
+
+#scatterplot {
+  background-color: whitesmoke;
+}
+
+.cursor-crosshair {
+  cursor: pointer !important;
+}
+
+.surface {
+  pointer-events: none !important;
 }
 
 .leaflet-right {
