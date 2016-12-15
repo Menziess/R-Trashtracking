@@ -4,8 +4,8 @@ library(plyr)
 library(ggplot2)
 library(scales)
 
-trash <- read.csv(file="C:/Users/somaye/Documents/output.csv",head=TRUE,sep=",")
-
+# trash <- read.csv(file="C:/Users/somaye/Documents/output.csv",head=TRUE,sep=",")
+trash <- read.csv('../Data/output.csv', head = T, sep = ",") 
 
 # Header -----------------------------------------------------------
 
