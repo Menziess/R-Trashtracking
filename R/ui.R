@@ -17,9 +17,8 @@ shinyUI(navbarPage("Trashtracking",
   ########################
   
   tabPanel("Overview",
-          includeCSS("styles.css"),
-          class = "overview",
-          source('trash_overview.R')
+          source('trash_overview.R'),
+          class = "overview"
   ),
   
   ########################

@@ -3,6 +3,12 @@ html {
   overflow-x:hidden;
 }
 
+.overview {
+  left: 0;
+  right: 0;
+  height: 100%;
+}
+
 .map {
   position: fixed;
   float: left;
