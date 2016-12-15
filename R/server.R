@@ -53,7 +53,6 @@ shinyServer(function(input, output, session) {
   #       Inputs        #
   #######################
   
-  # Scatterplot
   # Trash type  
   output$trashTypeInput = renderUI({
     names <- distinct(trash, type)
