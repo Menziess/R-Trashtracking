@@ -70,9 +70,7 @@ shinyServer(function(input, output, session) {
   #######################
   
   output$overview <- renderPlot({ 
-    
     Mdata <- reactive({
-      
       tabletype = table(trash$brand, trash$type)
       types = as.data.frame(tabletype)
       names(types)[1] = 'brand'
@@ -80,10 +78,7 @@ shinyServer(function(input, output, session) {
       names(types)[3] = 'amount'
       types <- types[order(-types$amount),]
       types <- filter(types,grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand))
-      
-      # Calculate the percentages
       df = ddply(types, .(brand), transform, percent = round((amount/sum(amount) * 100),1))
-      
     })
     
     ggplot(Mdata(), aes(x=reorder(brand,amount,function(x)+sum(x)), y=percent, fill=type))+
@@ -93,7 +88,6 @@ shinyServer(function(input, output, session) {
       scale_y_continuous(labels = percent_format())+
       ylab("")+
       xlab("")
-    
   })
   
   #######################
@@ -199,7 +193,7 @@ shinyServer(function(input, output, session) {
         }
       } 
       
-      # Update table
+      # Update Table
       incProgress(4/4, detail = "Baking piecharts")
       output$table <- renderDataTable({
         if(!is.data.frame(analyzation))
@@ -207,7 +201,7 @@ shinyServer(function(input, output, session) {
         analyzation
       })
       
-      # Update plot
+      # Update Places Barchart
       output$plot <- renderPlotly({
         if(!is.data.frame(analyzation))
           return()
@@ -217,20 +211,16 @@ shinyServer(function(input, output, session) {
                 name = "Top places with trash",
                 type = "bar"
         ) %>% 
-          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
-          )
+        config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+               editable = FALSE, sendData = FALSE, displaylogo = FALSE
+        ) %>%
+        layout(title = 'Trash connected to nearby Google Places',
+               xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE,
+                            zeroline = FALSE, showticklabels = FALSE))
       })
-                 #)%>%
-          
-        #layout(title = 'Trash connected to nearby Google Places',
-              #xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-              #yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE, 
-                            #zeroline = FALSE, showticklabels = FALSE))
-  
       
-      
-      # Update pie
+      # Update Type Piechart
       output$pie_trash_type <- renderPlotly({
         if(!is.data.frame(analyzation))
           return()
@@ -250,7 +240,7 @@ shinyServer(function(input, output, session) {
                             zeroline = FALSE, showticklabels = FALSE))
       })
       
-      # Update pie
+      # Update Brand Piechart
       output$pie_trash_brand <- renderPlotly({
         if(!is.data.frame(analyzation))
           return()
@@ -260,8 +250,8 @@ shinyServer(function(input, output, session) {
                 name = "Trash distribution",
                 type = "pie"
         ) %>% 
-          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+        config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+               editable = FALSE, sendData = FALSE, displaylogo = FALSE
         ) %>%
         layout(title = 'Trash brands within selected area',
                legend = list(x = 100, y = 0.5),
@@ -354,6 +344,11 @@ shinyServer(function(input, output, session) {
   ########################
   #       Buttons        #
   ########################
+  
+  # Button Explore
+  observeEvent(input$explore, {
+    updateNavbarPage(session, "Trashtracking", "Map")
+  })
   
   # Button Map Page
   observeEvent(input$showMap, {

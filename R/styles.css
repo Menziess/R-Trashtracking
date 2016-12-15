@@ -15,8 +15,6 @@ html {
   top: 51px;
   left: 0;
   right: 0;
-  width: 70%;
-  height: 100%;
   overflow: hidden;
   bottom: 0;
   padding: 0;
@@ -48,3 +46,7 @@ html {
   display: none;
 }
 
+#collapse_sidebar {
+  transition: 0.5s;
+  overflow-x: hidden;
+}
