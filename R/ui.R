@@ -24,8 +24,8 @@ shinyUI(navbarPage("Trashtracking",
              helpText("To become a hunter download the Trash Hunters app for free, 
        now available in the App and Playstore!"),
              plotOutput("overview"),
-             helpText("This graph shows the all time top 10 brands that are found"),
-             actionButton("showMap", "Show me the trash on a map", class = "btn-success btn-lg", style = "margin-top: 2em;")
+             helpText("This graph shows the all time top 10 brands that are found")
+             # actionButton("showMap", "Show me the trash on a map", class = "btn-success btn-lg", style = "margin-top: 2em;")
       )
     )
   ),
@@ -51,7 +51,7 @@ shinyUI(navbarPage("Trashtracking",
       ########################
       
       leafletOutput("map", width = "100%", height = "100%"),
-      absolutePanel(class = "panel panel-primary", style = "width: 20em;", bottom = 0, left = 10, draggable = F,
+      absolutePanel(class = "panel panel-primary", style = "width: 20em;", left = 10, draggable = F,
         div(class = "panel-heading", "Controls",
           div(style="margin-top: 0px;",
             uiOutput("graphButton"),
@@ -73,20 +73,23 @@ shinyUI(navbarPage("Trashtracking",
             h4("Google Places"),
             uiOutput("locationTypeInput"),
             helpText("Distance in meters"),
-            sliderInput("distanceSlider", NULL,
-                        min = 100, max = 2500, value = 1000)
+            sliderInput("distanceSlider", NULL, min = 100, max = 2500, value = 1000)
             # checkboxInput("checkboxLocationInput", "Show Places on the map", value = T),
           )
         ),
+        # Info footer
         div(class = "panel-footer", 
-            textOutput("text")
-        ))
+          textOutput("text")
+        )
       )
-    # ,
-    #   div(class="below",
-    #     plotlyOutput("plot")
-    #   )
     ),
+    # Sidebar
+    absolutePanel(class = "panel panel-primary", bottom = -25, top = 0, right = 0, style = "width: 35em;",
+      div(class="panel-body", style="background-color: red;"
+        # plotlyOutput("plot")
+      )
+    )
+  ),
     
   ########################
   #      Statistics      #
@@ -103,7 +106,7 @@ shinyUI(navbarPage("Trashtracking",
           Please go to back to the map-tab and click on the place you would 
                    like to see statistics about, then click on the Stats button"),
           actionButton("showMap", "Show me the trash on a map", class = "btn-success btn-lg", style = "margin-top: 2em;")
-        ), 
+        ),
         plotlyOutput("plot")
       )
     ),
