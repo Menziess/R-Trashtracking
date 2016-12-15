@@ -105,7 +105,8 @@ shinyServer(function(input, output, session) {
       school <- radarSearch(click$lat, click$lng, input$distanceSlider, "school")
       cafe <- radarSearch(click$lat, click$lng, input$distanceSlider, "cafe")
       takeaway <- radarSearch(click$lat, click$lng, input$distanceSlider, "meal_takeaway")
-      schools <- school
+      university <- radarSearch(click$lat, click$lng, input$distanceSlider, "university")
+      schools <- c(school, university)
       restaurants <- c(cafe, takeaway)
       places <- c(school, cafe, takeaway)
       nrResults <- length(places$results)
@@ -281,12 +282,34 @@ shinyServer(function(input, output, session) {
     click <- event_data("plotly_click")
     if(is.null(click) || !is.data.frame(analyzation))
       return()
-    output$LocationName <- renderPrint({
-      # TODO: Jeffrey
-      analyzation[click$pointNumber + 1,]$Place
-    })
+    locationDetails <- locationSearch(analyzation[click$pointNumber + 1,]$Place)
+    output$LocationName <- renderText(
+      paste(locationDetails$result$name)
+    )
+    output$LocationAdress <- renderText(
+      paste("Adress: ", locationDetails$result$formatted_address)
+    )
+    if (is.null(locationDetails$result$formatted_phone_number)){
+      output$LocationPhone <- renderText(
+        paste("Phonenumber: Not Available")
+      )
+    } else {
+      output$LocationPhone <- renderText(
+        paste("Phonenumber: ", locationDetails$result$formatted_phone_number)
+      )
+    }
+    if (is.null(locationDetails$result$website)){
+      output$LocationWebsite <- renderText(
+        paste("Website: Not Available")
+      )
+    } else {
+      output$LocationWebsite <- renderText(
+        paste("Website: ", locationDetails$result$website)
+      )
+    }
     updateNavbarPage(session, "Trashtracking", "Details")
   })
+  
   
   
   ########################
@@ -301,15 +324,5 @@ shinyServer(function(input, output, session) {
   # Button Statistics Page
   observeEvent(input$showStatistics, {
     updateNavbarPage(session, "Trashtracking", "Statistics")
-  })
-  
-  # Button Location Detail Page
-  observeEvent(input$showLocationDetails, {
-    locationDetails <- locationSearch("ChIJv_eH87sJxkcRufIWAPR3ro8")
-    
-    output$LocationName <- renderText(paste(locationDetails$result$name))
-    output$LocationAdress <- renderText(paste("Adress: " + locationDetails$result$formatted_address))
-    
-    updateNavbarPage(session, "Trashtracking", "Details")
   })
 })
