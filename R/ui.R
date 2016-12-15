@@ -52,7 +52,7 @@ shinyUI(navbarPage("Trashtracking",
             HTML('<button class="btn btn-danger pull-right" data-toggle="collapse" data-target="#collapse">+</button>')
         ),
         div(class = "panel-body",
-          div(id = "collapse", class = "collapse",
+          div(id = "collapse", class = "collapse in",
          
             # Trash  
             h4("Trash"),
