@@ -48,8 +48,8 @@ shinyUI(navbarPage("Trashtracking",
       
       leafletOutput("map", width = "100%", height = "100%"),
       absolutePanel(class = "panel panel-primary", style = "width: 20em;", bottom = 0, left = 10, draggable = F,
-        div(class = "panel-heading", "Filters", 
-            HTML('<button class="btn btn-danger pull-right" data-toggle="collapse" data-target="#collapse">+</button>')
+        div(class = "panel-heading", "Controls", 
+            HTML('<button class="btn btn-danger pull-right" data-toggle="collapse" data-target="#collapse">filter</button>')
         ),
         div(class = "panel-body",
           div(id = "collapse", class = "collapse",
@@ -78,7 +78,6 @@ shinyUI(navbarPage("Trashtracking",
       )
     )
   ),
-  
   ########################
   #      Statistics      #
   ########################
@@ -87,7 +86,15 @@ shinyUI(navbarPage("Trashtracking",
     textOutput("print"),
     column(12, align = "center",
       div(class="plot",
-        h1("Places with most trash"),
+        h4("Trash information of the selected area"),
+        conditionalPanel(
+          condition="!output.plot",
+          helpText("Oops! Sorry we can not show statistics if you don't select an area first.
+          Please go to back to the map-tab and click on the place you would 
+                   like to see statistics about, then click on the Stats button"),
+          actionButton("showMap", "Show me the trash on a map",
+                       class = "btn-success btn-lg", style = "margin-top: 2em;")
+        ), 
         plotlyOutput("plot")
       )
     ),
@@ -109,14 +116,21 @@ shinyUI(navbarPage("Trashtracking",
   
   tabPanel("Details",
     column(12, align = "center",
-      h1("Place details")
-    ),
+      h4("Place details")
+    ,
+    conditionalPanel(
+      condition="!output.plot",
+      helpText("Oops! Sorry we can not show any details if you don't select an area first.
+          Please go back to the map-tab and click on the
+               place you would like to know more details about."),
+      actionButton("showMap", "Show me the trash on a map",
+                   class = "btn-success btn-lg", style = "margin-top: 2em;"))
+      , 
     div(class = "panel-body",
       h3(textOutput("LocationName")),
       hr(),
-      textOutput("LocationAdress"),
-      actionButton("showLocationDetails", "Show Location")
-    )
+      textOutput("LocationAdress")
+    ))
   ),
   
   ########################
