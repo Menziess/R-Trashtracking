@@ -110,14 +110,13 @@ shinyUI(navbarPage("Trashtracking",
   ########################
   
   tabPanel("Details",
-    column(12, align = "center",
-      h1("Place details")
-    ),
+    column(12, align = "center", h1("Place details")),
     div(class = "panel-body",
       h3(textOutput("LocationName")),
       hr(),
       textOutput("LocationAdress"),
-      actionButton("showLocationDetails", "Show Location")
+      textOutput("LocationPhone"),
+      textOutput("LocationWebsite")
     )
   ),
   

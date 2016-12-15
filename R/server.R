@@ -105,19 +105,20 @@ shinyServer(function(input, output, session) {
       school <- radarSearch(click$lat, click$lng, input$distanceSlider, "school")
       cafe <- radarSearch(click$lat, click$lng, input$distanceSlider, "cafe")
       takeaway <- radarSearch(click$lat, click$lng, input$distanceSlider, "meal_takeaway")
-      schools <- school
-      restaurants <- c(cafe, takeaway)
-      places <- c(school, cafe, takeaway)
-      nrResults <- length(places$results)
+      university <- radarSearch(click$lat, click$lng, input$distanceSlider, "university")
+      schools <- c(school$results, university$results)
+      restaurants <- c(cafe$results, takeaway$results)
+      places <- c(school$results, cafe$results, takeaway$results, university$results)
+      nrResults <- length(places)
       
       if(nrResults == 0) {
         output$text <- renderText(paste("No places found in this area."))
       } else {
         
         # Flatten places
-        schools <- do.call(rbind, lapply(schools$results, data.frame, stringsAsFactors=FALSE))
-        restaurants <- do.call(rbind, lapply(restaurants$results, data.frame, stringsAsFactors=FALSE))
-        places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
+        schools <- do.call(rbind, lapply(schools, data.frame, stringsAsFactors=FALSE))
+        restaurants <- do.call(rbind, lapply(restaurants, data.frame, stringsAsFactors=FALSE))
+        places <- do.call(rbind, lapply(places, data.frame, stringsAsFactors=FALSE))
         
         # Preperation
         incProgress(1/4, detail = "Filtering Trash")
@@ -128,7 +129,6 @@ shinyServer(function(input, output, session) {
         # Analyzation
         incProgress(2/4, detail = "Distance between Trash and Places")
         analyzation <<- analyse(trash, places)
-        analyzation$Place <- paste(input$locationType ,seq.int(nrow(analyzation)))
         
         # Alternate icon
         greenLeafIcon <- makeIcon(
@@ -281,12 +281,34 @@ shinyServer(function(input, output, session) {
     click <- event_data("plotly_click")
     if(is.null(click) || !is.data.frame(analyzation))
       return()
-    output$LocationName <- renderPrint({
-      # TODO: Jeffrey
-      analyzation[click$pointNumber + 1,]$Place
-    })
+    locationDetails <- locationSearch(analyzation[click$pointNumber + 1,]$Place)
+    output$LocationName <- renderText(
+      paste(locationDetails$result$name)
+    )
+    output$LocationAdress <- renderText(
+      paste("Adress: ", locationDetails$result$formatted_address)
+    )
+    if (is.null(locationDetails$result$formatted_phone_number)){
+      output$LocationPhone <- renderText(
+        paste("Phonenumber: Not Available")
+      )
+    } else {
+      output$LocationPhone <- renderText(
+        paste("Phonenumber: ", locationDetails$result$formatted_phone_number)
+      )
+    }
+    if (is.null(locationDetails$result$website)){
+      output$LocationWebsite <- renderText(
+        paste("Website: Not Available")
+      )
+    } else {
+      output$LocationWebsite <- renderText(
+        paste("Website: ", locationDetails$result$website)
+      )
+    }
     updateNavbarPage(session, "Trashtracking", "Details")
   })
+  
   
   
   ########################
@@ -301,15 +323,5 @@ shinyServer(function(input, output, session) {
   # Button Statistics Page
   observeEvent(input$showStatistics, {
     updateNavbarPage(session, "Trashtracking", "Statistics")
-  })
-  
-  # Button Location Detail Page
-  observeEvent(input$showLocationDetails, {
-    locationDetails <- locationSearch("ChIJv_eH87sJxkcRufIWAPR3ro8")
-    
-    output$LocationName <- renderText(paste(locationDetails$result$name))
-    output$LocationAdress <- renderText(paste("Adress: " + locationDetails$result$formatted_address))
-    
-    updateNavbarPage(session, "Trashtracking", "Details")
   })
 })
