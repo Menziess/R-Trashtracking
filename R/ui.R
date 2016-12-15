@@ -48,11 +48,14 @@ shinyUI(navbarPage("Trashtracking",
       
       leafletOutput("map", width = "100%", height = "100%"),
       absolutePanel(class = "panel panel-primary", style = "width: 20em;", bottom = 0, left = 10, draggable = F,
-        div(class = "panel-heading", "Controls", 
-            HTML('<button class="btn btn-danger pull-right" data-toggle="collapse" data-target="#collapse">filter</button>')
+        div(class = "panel-heading", "Controls",
+            div(style="margin-top: 0px;",
+              uiOutput("graphButton"),
+              HTML('<button class="btn btn-danger pull-right" data-toggle="collapse" data-target="#collapse">filter</button>')
+            )
         ),
         div(class = "panel-body",
-          div(id = "collapse", class = "collapse",
+          div(id = "collapse", class = "collapse in",
          
             # Trash  
             h4("Trash"),
@@ -67,9 +70,8 @@ shinyUI(navbarPage("Trashtracking",
             uiOutput("locationTypeInput"),
             helpText("Distance in meters"),
             sliderInput("distanceSlider", NULL,
-                        min = 100, max = 2500, value = 1000),
+                        min = 100, max = 2500, value = 1000)
             # checkboxInput("checkboxLocationInput", "Show Places on the map", value = T),
-            uiOutput("graphButton")
           )
         ),
         div(class = "panel-footer", 
@@ -129,7 +131,9 @@ shinyUI(navbarPage("Trashtracking",
     div(class = "panel-body",
       h3(textOutput("LocationName")),
       hr(),
-      textOutput("LocationAdress")
+      textOutput("LocationAdress"),
+      textOutput("LocationPhone"),
+      textOutput("LocationWebsite")
     ))
   ),
   
