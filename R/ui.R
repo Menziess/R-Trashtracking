@@ -17,13 +17,13 @@ shinyUI(navbarPage("Trashtracking",
   ########################
   
   tabPanel("Overview",
-    source('trash_overview.R'),
+    # source('trash_overview.R'),
     div(class="scatterplot",
       column(12, align = "center",
              h4("Thanks to the trash hunters we know.."),
              helpText("To become a hunter download the Trash Hunters app for free, 
        now available in the App and Playstore!"),
-             plotOutput("scatterplot"),
+             plotOutput("overview"),
              helpText("This graph shows the all time top 10 brands that are found"),
              actionButton("showMap", "Show me the trash on a map", class = "btn-success btn-lg", style = "margin-top: 2em;")
       )
@@ -102,8 +102,7 @@ shinyUI(navbarPage("Trashtracking",
           helpText("Oops! Sorry we can not show statistics if you don't select an area first.
           Please go to back to the map-tab and click on the place you would 
                    like to see statistics about, then click on the Stats button"),
-          actionButton("showMap", "Show me the trash on a map",
-                       class = "btn-success btn-lg", style = "margin-top: 2em;")
+          actionButton("showMap", "Show me the trash on a map", class = "btn-success btn-lg", style = "margin-top: 2em;")
         ), 
         plotlyOutput("plot")
       )
