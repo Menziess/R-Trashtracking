@@ -47,29 +47,33 @@ shinyUI(navbarPage("Trashtracking",
       ########################
       
       leafletOutput("map", width = "100%", height = "100%"),
-      absolutePanel(class = "panel panel-primary", bottom = 0, left = 10, draggable = T,
-        div(class = "panel-heading", "Controls"),
+      absolutePanel(class = "panel panel-primary", style = "width: 20em;", bottom = 0, left = 10, draggable = F,
+        div(class = "panel-heading", "Filters", 
+            HTML('<button class="btn btn-danger pull-right" data-toggle="collapse" data-target="#collapse">+</button>')
+        ),
         div(class = "panel-body",
+          div(id = "collapse", class = "collapse",
          
-          # Trash  
-          h4("Trash"),
-          dateRangeInput("daterange", NULL, start = "2015-05-31", end = "2016-03-15"),
-          helpText("Choose type or brand"),
-          uiOutput("trashTypeInput"),
-          uiOutput("trashBrandInput"),
-          hr(), 
-          
-          # Places
-          h4("Google Places"),
-          uiOutput("locationTypeInput"),
-          helpText("Distance in meters"),
-          sliderInput("distanceSlider", NULL,
-                      min = 100, max = 2500, value = 1000),
-          # checkboxInput("checkboxLocationInput", "Show Places on the map", value = T),
-          uiOutput("graphButton")
+            # Trash  
+            h4("Trash"),
+            dateRangeInput("daterange", NULL, start = "2015-05-31", end = "2016-03-15"),
+            helpText("Choose type or brand"),
+            uiOutput("trashTypeInput"),
+            uiOutput("trashBrandInput"),
+            hr(), 
+            
+            # Places
+            h4("Google Places"),
+            uiOutput("locationTypeInput"),
+            helpText("Distance in meters"),
+            sliderInput("distanceSlider", NULL,
+                        min = 100, max = 2500, value = 1000),
+            # checkboxInput("checkboxLocationInput", "Show Places on the map", value = T),
+            uiOutput("graphButton")
+          )
         ),
         div(class = "panel-footer", 
-          textOutput("text")
+            textOutput("text")
         )
       )
     )

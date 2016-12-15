@@ -142,7 +142,6 @@ shinyServer(function(input, output, session) {
         # Analyzation
         incProgress(2/4, detail = "Distance between Trash and Places")
         analyzation <<- analyse(trash, places)
-        browser()
         analyzation$Place <- paste(input$locationType ,seq.int(nrow(analyzation)))
         
         # Alternate icon
