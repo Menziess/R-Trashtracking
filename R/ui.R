@@ -25,6 +25,9 @@ shinyUI(navbarPage("Trashtracking",
              plotOutput("overview"),
              helpText("This graph shows the all time top 10 brands that are found"),
              actionButton("explore", "Explore", class = "btn-success btn-lg", style = "margin-top: 2em;")
+             ),
+      column(12, align = "center",
+             dataTableOutput(outputId="M3")
       )
     )
   ),
@@ -93,8 +96,14 @@ shinyUI(navbarPage("Trashtracking",
           uiOutput("graphButton")
         ),
         div(id="sidebar_content", style="display: none",
-          helpText("Lorem ipsum dolor sit amet, per eius ullum ne, per ea eligendi voluptatum. Ad suas menandri eum, at per movet utinam, at iriure omittam mel. Novum dolor ocurreret mea ad, modo augue feugait est ne. Per ad error tritani. Ius ignota legendos disputando et. Ad cum corpora luptatum hendrerit, qui cu saperet percipit persequeris. Per inani dicam utroque ea. Ei agam libris cum, te esse laboramus nec, ex quo eripuit maiorum. Te has delectus periculis, eu assum populo commune eos. Sit no nonumy aliquip scripserit, ex eripuit blandit facilisi duo. Ut usu repudiare intellegat, te sit augue dicta equidem. In mel libris impedit deserunt. Vix maiorum splendide at, has et error movet qualisque. Qui eu sanctus minimum placerat, facer verterem intellegat id mel. Munere dissentiet consequuntur nec eu, et aeque iusto ocurreret sit, eam error molestie maluisset ut. An vitae referrentur usu. In tibique postulant repudiandae qui, ea vis utamur salutatus urbanitas. His dolores copiosae inciderint in, eam legimus honestatis mediocritatem at. Audiam impedit quo an, pri duis aperiam moderatius cu, nec exerci cetero corpora te. Est mucius mandamus ne."),
+          helpText("click on the botton to see the charts in big scale"),
           plotlyOutput("plot")
+        ),
+        div(id="pie_type",
+            plotlyOutput("pie_trash_type")   
+        ),
+        div(id="pie_brand_type",
+            plotlyOutput("pie_trash_brand")
         )
       )
     )
@@ -128,16 +137,16 @@ shinyUI(navbarPage("Trashtracking",
         )
       )
     ),
-    column(6,
+     column(6,
+       div(class="pie",
+         plotlyOutput("pie_trash_type2")
+       )
+     ),
+     column(6,
       div(class="pie",
-        plotlyOutput("pie_trash_type")
-      )
-    ),
-    column(6,
-     div(class="pie",
-        plotlyOutput("pie_trash_brand")
-      )
-    )
+         plotlyOutput("pie_trash_brand2")
+       )
+     )
   ),
   
   ########################

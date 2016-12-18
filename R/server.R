@@ -81,6 +81,10 @@ shinyServer(function(input, output, session) {
       df = ddply(types, .(brand), transform, percent = round((amount/sum(amount) * 100),1))
     })
     
+    output$M3 <- renderDataTable({
+      Mdata()
+    })
+    
     ggplot(Mdata(), aes(x=reorder(brand,amount,function(x)+sum(x)), y=percent, fill=type))+
       geom_bar(position = "fill", stat='identity',  width = .7)+
       geom_text(aes(label=percent, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
@@ -88,7 +92,8 @@ shinyServer(function(input, output, session) {
       scale_y_continuous(labels = percent_format())+
       ylab("")+
       xlab("")
-  })
+    })
+    
   
   #######################
   #      Observers      #
@@ -260,6 +265,26 @@ shinyServer(function(input, output, session) {
                             zeroline = FALSE, showticklabels = FALSE))
       })
       
+      # Update big Type Piechart
+      output$pie_trash_type2 <- renderPlotly({
+        if(!is.data.frame(analyzation))
+          return()
+        plot_ly(head(trash %>% count(type, sort = T), 10),
+                labels = ~type,
+                values = ~n,
+                name = "Trash distribution",
+                type = "pie"
+        ) %>% 
+          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+          ) %>%
+          layout(title = 'Trash types within selected area',
+                 legend = list(x = 100, y = 0.5),
+                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, 
+                              zeroline = FALSE, showticklabels = FALSE))
+      })
+      
       # Update Brand Piechart
       output$pie_trash_brand <- renderPlotly({
         if(!is.data.frame(analyzation))
@@ -278,6 +303,26 @@ shinyServer(function(input, output, session) {
                xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, 
                             zeroline = FALSE, showticklabels = FALSE))
+      })
+      
+      # Update big Brand Piechart
+      output$pie_trash_brand2 <- renderPlotly({
+        if(!is.data.frame(analyzation))
+          return()
+        plot_ly(head(trash %>% count(brand, sort = T), 10),
+                labels = ~brand,
+                values = ~n,
+                name = "Trash distribution",
+                type = "pie"
+        ) %>% 
+          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+          ) %>%
+          layout(title = 'Trash brands within selected area',
+                 legend = list(x = 100, y = 0.5),
+                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, 
+                              zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Informative text
