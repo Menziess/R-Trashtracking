@@ -47,7 +47,17 @@ html {
 }
 
 #collapse_sidebar {
-  transition: 0.5s;
   overflow-x: hidden;
-  transform: translateX(30em);
+  -webkit-transition: -webkit-transform 0.3s;
+     -moz-transition: -moz-transform 0.3s;
+       -o-transition: -o-transform 0.3s;
+          transition: transform 0.3s;
+}
+
+.collapsed-sidebar {
+  -webkit-transform: translateX(30em);
+     -moz-transform: translateX(30em);
+      -ms-transform: translateX(30em);
+       -o-transform: translateX(30em);
+          transform: translateX(30em);
 }

@@ -1,4 +1,3 @@
-
 # This is the user-interface definition of a Shiny web application.
 # You can find out more about building applications with Shiny here:
 #
@@ -88,7 +87,7 @@ shinyUI(navbarPage("Trashtracking",
     ),
     
     # Sidebar
-    absolutePanel(id="collapse_sidebar", class = "panel panel-primary", top = "3.7em", right = 0, style = "width: 35em; height: 100%; position: fixed;",
+    absolutePanel(id="collapse_sidebar", class = "collapsed-sidebar panel panel-primary", top = "3.7em", right = 0, style = "width: 35em; height: 100%; position: fixed;",
       div(class="panel-body", style="height:100%; display: block",
         div(bottom=0,
           HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
