@@ -49,4 +49,5 @@ html {
 #collapse_sidebar {
   transition: 0.5s;
   overflow-x: hidden;
+  transform: translateX(30em);
 }

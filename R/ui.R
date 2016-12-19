@@ -88,14 +88,14 @@ shinyUI(navbarPage("Trashtracking",
     ),
     
     # Sidebar
-    absolutePanel(id="collapse_sidebar", class = "panel panel-primary", top = "3.7em", right = 0, style = "width: 5em; height: 100%; position: fixed;",
+    absolutePanel(id="collapse_sidebar", class = "panel panel-primary", top = "3.7em", right = 0, style = "width: 35em; height: 100%; position: fixed;",
       div(class="panel-body", style="height:100%; display: block",
         div(bottom=0,
           HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
                 &#10010;</button>'),
           uiOutput("graphButton")
         ),
-        div(id="sidebar_content", style="display: none",
+        div(
           helpText("click on the botton to see the charts in big scale"),
           plotlyOutput("plot")
         ),

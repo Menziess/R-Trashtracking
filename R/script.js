@@ -4,15 +4,12 @@ $(document).ready(function(){
   }, 1000);
 });
 
-/* Set the width of the side navigation to 35em */
+/* Set the transform translateX to 0 to collapse the sidebar */
 function openSidebar() {
   sidebar = document.getElementById("collapse_sidebar");
-  content = document.getElementById("sidebar_content");
-  if (sidebar.style.width == "35em") {
-    sidebar.style.width = "5em";
-    content.style.display = "none";
+  if (sidebar.style.transform == "translateX(0em)") {
+      sidebar.style.transform = "translateX(30em)";
   } else {
-    sidebar.style.width = "35em";
-    content.style.display = "";
+      sidebar.style.transform = "translateX(0em)";
   }
 }
