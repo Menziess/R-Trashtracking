@@ -154,49 +154,6 @@ shinyServer(function(input, output, session) {
         # Analyzation
         incProgress(2/4, detail = "Distance between Trash and Places")
         analyzation <<- analyse(trash, places)
-        
-        # Alternate icon
-        # greenLeafIcon <- makeIcon(
-        #   iconUrl = "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/map-marker-icon.png",
-        #   iconWidth = 38, iconHeight = 40
-        # )
-        # blueLeafIcon <- makeIcon(
-        #   iconUrl = "http://i.imgur.com/heDEpTw.png",
-        #   iconWidth = 38, iconHeight = 40
-        # )
-        # 
-        # # Adds google search locations to the map
-        # incProgress(3/4, detail = "Drawing Places on the map")
-        # if (length(schools) > 0){
-        #   map %>% 
-        #     clearGroup('schoolgroup') %>%
-        #     addMarkers(
-        #       data = schools,
-        #       group = 'schoolgroup',
-        #       lng = schools$geometry.location.lng, 
-        #       lat = schools$geometry.location.lat,
-        #       popup = "School",
-        #       icon = greenLeafIcon
-        #     )
-        # } else {
-        #   map %>%
-        #     clearGroup('schoolgroup')
-        # }
-        # if (length(restaurants) > 0){
-        #   map %>%
-        #     clearGroup('restaurantgroup') %>%
-        #     addMarkers(
-        #       data = restaurants,
-        #       group = 'restaurantgroup',
-        #       lng = restaurants$geometry.location.lng, 
-        #       lat = restaurants$geometry.location.lat,
-        #       popup = "Restaurant",
-        #       icon = blueLeafIcon
-        #     )
-        # } else {
-        #   map %>%
-        #     clearGroup('restaurantgroup')
-        # }
       } 
       
       # Update Table
@@ -217,7 +174,7 @@ shinyServer(function(input, output, session) {
                 name = "Top places with trash",
                 type = "bar",
                 hoverinfo = "text",
-                text = "Click for more info"
+                text = ~paste(Amount, " trash found")
         ) %>% 
         config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
                editable = FALSE, sendData = FALSE, displaylogo = FALSE
@@ -274,7 +231,7 @@ shinyServer(function(input, output, session) {
       # Add distance circle
       map %>% 
         clearGroup('circles') %>%
-        addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles", fill = FALSE)
+        addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles", fillOpacity = 0.05)
       
       output$graphButton <- renderUI({
         if(!is.data.frame(analyzation))
@@ -333,7 +290,7 @@ shinyServer(function(input, output, session) {
           iconUrl = response$result$icon,
           iconWidth = 38, iconHeight = 40
         )
-      )
+      ) %>% setView(response$result$geometry$location$lng, response$result$geometry$location$lat, 15)
     
   })
   
