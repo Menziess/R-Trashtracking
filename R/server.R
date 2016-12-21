@@ -143,7 +143,6 @@ shinyServer(function(input, output, session) {
         schools <- do.call(rbind, lapply(schools, data.frame, stringsAsFactors=FALSE))
         restaurants <- do.call(rbind, lapply(restaurants, data.frame, stringsAsFactors=FALSE))
         places <- do.call(rbind, lapply(places, data.frame, stringsAsFactors=FALSE))
-        # places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
         
         # Preperation
         incProgress(1/4, detail = "Filtering Trash")
@@ -156,22 +155,15 @@ shinyServer(function(input, output, session) {
         analyzation <<- analyse(trash, places)
       } 
       
-      # Update Table
-      incProgress(4/4, detail = "Baking piecharts")
-      output$table <- renderDataTable({
-        if(!is.data.frame(analyzation))
-          return()
-        analyzation
-      })
-      
       # Update Places Barchart
+      incProgress(3/4, detail = "Render graphs")
       output$plot <- renderPlotly({
         if(!is.data.frame(analyzation))
           return()
         plot_ly(analyzation,
                 x = ~Place,
                 y = ~Amount,
-                name = "Top places with trash",
+                name = "Top 10 places with trash",
                 type = "bar",
                 hoverinfo = "text",
                 text = ~paste(Amount, " trash found")
@@ -179,9 +171,9 @@ shinyServer(function(input, output, session) {
         config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
                editable = FALSE, sendData = FALSE, displaylogo = FALSE
         ) %>%
-        layout(title = 'Trash connected to nearby Google Places',
+        layout(title = 'Top 10 places with most trash nearby',
                xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-               yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE,
+               yaxis = list(title = "All data within the blue circle", showgrid = FALSE,
                             zeroline = FALSE, showticklabels = FALSE))
       })
       
@@ -231,14 +223,24 @@ shinyServer(function(input, output, session) {
       # Add distance circle
       map %>% 
         clearGroup('circles') %>%
+        clearGroup('placemarkers') %>%
         addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles", fillOpacity = 0.05)
       
-      output$graphButton <- renderUI({
-        if(!is.data.frame(analyzation))
-          return()
-          actionButton("showStatistics", HTML("&#10064;"), class = "btn btn-success", style="height: 2.8em")
-      })
-  
+      # Add google markers
+      for(i in analyzation$Place) {
+        response <- locationSearch(i)
+        map %>%
+          addMarkers(
+            group = 'placemarkers',
+            lng = response$result$geometry$location$lng,
+            lat = response$result$geometry$location$lat,
+            popup = response$result$name,
+            icon = makeIcon(
+              iconUrl = response$result$icon,
+              iconWidth = 38, iconHeight = 40
+            )
+          )
+      }
     })
   })
   
@@ -256,9 +258,6 @@ shinyServer(function(input, output, session) {
     if(is.null(click))
       return()
     map %>% clearGroup('circles') %>% clearGroup('placemarkers')
-    
-    # Remove everything else
-    #@TODO 2
   })
   
   # Barchart click
@@ -280,17 +279,8 @@ shinyServer(function(input, output, session) {
       ))
     })
     
-    map %>%
-      addMarkers(
-        group = 'placemarkers',
-        lng = response$result$geometry$location$lng,
-        lat = response$result$geometry$location$lat,
-        popup = response$result$name,
-        icon = makeIcon(
-          iconUrl = response$result$icon,
-          iconWidth = 38, iconHeight = 40
-        )
-      ) %>% setView(response$result$geometry$location$lng, response$result$geometry$location$lat, 15)
+    map %>% 
+      setView(response$result$geometry$location$lng, response$result$geometry$location$lat, 15)
     
   })
   

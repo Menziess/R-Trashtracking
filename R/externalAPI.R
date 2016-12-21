@@ -53,8 +53,8 @@ analyse <- function(trash, places) {
   total <- merge(trash, places, by=c("place_id", "place_id")) %>% arrange(desc(n))
   total <- total[,1:4]
   colnames(total) <- c("Place", "Amount", "Latitude", "Longitude")
-  
-  return (total)
+
+  return (head(total, 10))
 }
 
 # Convert meters to bearing

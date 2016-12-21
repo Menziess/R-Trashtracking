@@ -94,7 +94,7 @@ shinyUI(navbarPage("Trashtracking",
         ),
         conditionalPanel(
           condition = "!output.plot",
-          helpText("")
+          helpText("Click on the map")
         ),
         htmlOutput("details"),
         div(
