@@ -57,7 +57,7 @@ shinyUI(navbarPage("Trashtracking",
           div(style="margin-top: 0px;",
             HTML('<button class="btn btn-primary" style="top:0;right:0;position:absolute;height:2.7em;" 
                   data-toggle="collapse" data-target="#collapse_controls">
-                   &#10010;</button>')
+                  &#10010;</button>')
           )
         ),
         div(class = "panel-body",
@@ -76,7 +76,6 @@ shinyUI(navbarPage("Trashtracking",
             uiOutput("locationTypeInput"),
             helpText("Distance in meters"),
             sliderInput("distanceSlider", NULL, min = 100, max = 2500, value = 1000)
-            # checkboxInput("checkboxLocationInput", "Show Places on the map", value = T),
           )
         ),
         # Info footer
@@ -91,12 +90,16 @@ shinyUI(navbarPage("Trashtracking",
       div(class="panel-body", style="height:100%; display: block",
         div(bottom=0,
           HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
-                &#10010;</button>'),
-          uiOutput("graphButton")
+                &#10010;</button>')
         ),
+        conditionalPanel(
+          condition = "!output.plot",
+          helpText("")
+        ),
+        htmlOutput("details"),
         div(
-          helpText("click on the botton to see the charts in big scale"),
-          plotlyOutput("plot")
+          plotlyOutput("plot"),
+          HTML('<a href="#" data-toggle="popover" title="Popover Header" data-content="Some content inside the popover">Toggle popover</a>')
         ),
         div(id="pie_type",
             plotlyOutput("pie_trash_type")   
@@ -106,59 +109,9 @@ shinyUI(navbarPage("Trashtracking",
         )
       )
     )
-  ),
-    
-  ########################
-  #      Statistics      #
-  ########################
-  
-  tabPanel("Statistics",
-    textOutput("print"),
-    column(12, align = "center",
-      div(class="plot",
-        h4("Trash information of the selected area"),
-        conditionalPanel(
-          condition="!output.large_plot",
-          helpText("Oops! Sorry we can not show statistics if you don't select an area first.
-                   Please go to back to the map-tab and click on the place you would
-                   like to see statistics about, then click on the Stats button."),
-          actionButton("showMap", "Show me the trash on a map", class = "btn-success btn-lg", style = "margin-top: 2em;")
-        ),
-        plotlyOutput("large_plot")
-      ),
-      conditionalPanel(
-        condition="output.large_plot && !output.details",
-        helpText("Click on a bar to see the details.")
-      ),
-      column(6, align = "center", style = "margin-left: 32%;", 
-        div(class = "panel-body text-left",
-          htmlOutput("details")
-        )
-      )
-    ),
-     column(6,
-       div(class="pie",
-         plotlyOutput("pie_trash_type2")
-       )
-     ),
-     column(6,
-      div(class="pie",
-         plotlyOutput("pie_trash_brand2")
-       )
-     )
-  ),
-  
-  ########################
-  #         Table        #
-  ########################
-  
-  tabPanel("</>",
-    column(12, align = "center",
-    h1("Places with trash"),
-      div(class="tabel",
-         dataTableOutput("table")
-      )
-    )
   )
-))
+  
+)
+)
+
 

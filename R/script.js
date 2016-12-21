@@ -2,6 +2,9 @@ $(document).ready(function(){
   setTimeout(function() {
     $(".leaflet-right").remove();
   }, 1000);
+
+  $('[data-toggle="popover"]').popover(); 
+
 });
 
 /* Set the transform translateX to 0 to collapse the sidebar */

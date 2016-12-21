@@ -68,7 +68,7 @@ shinyServer(function(input, output, session) {
   #######################
   #       Outputs       #
   #######################
-  
+
   output$overview <- renderPlot({ 
     Mdata <- reactive({
       tabletype = table(trash$brand, trash$type)
@@ -156,47 +156,47 @@ shinyServer(function(input, output, session) {
         analyzation <<- analyse(trash, places)
         
         # Alternate icon
-        greenLeafIcon <- makeIcon(
-          iconUrl = "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/map-marker-icon.png",
-          iconWidth = 38, iconHeight = 40
-        )
-        blueLeafIcon <- makeIcon(
-          iconUrl = "http://i.imgur.com/heDEpTw.png",
-          iconWidth = 38, iconHeight = 40
-        )
-        
-        # Adds google search locations to the map
-        incProgress(3/4, detail = "Drawing Places on the map")
-        if (length(schools) > 0){
-          map %>% 
-            clearGroup('schoolgroup') %>%
-            addMarkers(
-              data = schools,
-              group = 'schoolgroup',
-              lng = schools$geometry.location.lng, 
-              lat = schools$geometry.location.lat,
-              popup = "School",
-              icon = greenLeafIcon
-            )
-        } else {
-          map %>%
-            clearGroup('schoolgroup')
-        }
-        if (length(restaurants) > 0){
-          map %>%
-            clearGroup('restaurantgroup') %>%
-            addMarkers(
-              data = restaurants,
-              group = 'restaurantgroup',
-              lng = restaurants$geometry.location.lng, 
-              lat = restaurants$geometry.location.lat,
-              popup = "Restaurant",
-              icon = blueLeafIcon
-            )
-        } else {
-          map %>%
-            clearGroup('restaurantgroup')
-        }
+        # greenLeafIcon <- makeIcon(
+        #   iconUrl = "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/map-marker-icon.png",
+        #   iconWidth = 38, iconHeight = 40
+        # )
+        # blueLeafIcon <- makeIcon(
+        #   iconUrl = "http://i.imgur.com/heDEpTw.png",
+        #   iconWidth = 38, iconHeight = 40
+        # )
+        # 
+        # # Adds google search locations to the map
+        # incProgress(3/4, detail = "Drawing Places on the map")
+        # if (length(schools) > 0){
+        #   map %>% 
+        #     clearGroup('schoolgroup') %>%
+        #     addMarkers(
+        #       data = schools,
+        #       group = 'schoolgroup',
+        #       lng = schools$geometry.location.lng, 
+        #       lat = schools$geometry.location.lat,
+        #       popup = "School",
+        #       icon = greenLeafIcon
+        #     )
+        # } else {
+        #   map %>%
+        #     clearGroup('schoolgroup')
+        # }
+        # if (length(restaurants) > 0){
+        #   map %>%
+        #     clearGroup('restaurantgroup') %>%
+        #     addMarkers(
+        #       data = restaurants,
+        #       group = 'restaurantgroup',
+        #       lng = restaurants$geometry.location.lng, 
+        #       lat = restaurants$geometry.location.lat,
+        #       popup = "Restaurant",
+        #       icon = blueLeafIcon
+        #     )
+        # } else {
+        #   map %>%
+        #     clearGroup('restaurantgroup')
+        # }
       } 
       
       # Update Table
@@ -215,7 +215,9 @@ shinyServer(function(input, output, session) {
                 x = ~Place,
                 y = ~Amount,
                 name = "Top places with trash",
-                type = "bar"
+                type = "bar",
+                hoverinfo = "text",
+                text = "Click for more info"
         ) %>% 
         config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
                editable = FALSE, sendData = FALSE, displaylogo = FALSE
@@ -224,25 +226,6 @@ shinyServer(function(input, output, session) {
                xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE,
                             zeroline = FALSE, showticklabels = FALSE))
-      })
-      
-      # Update Places Large Barchart
-      output$large_plot <- renderPlotly({
-        if(!is.data.frame(analyzation))
-          return()
-        plot_ly(analyzation,
-                x = ~Place,
-                y = ~Amount,
-                name = "Top places with trash",
-                type = "bar"
-        ) %>% 
-          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
-          ) %>%
-          layout(title = 'Trash connected to nearby Google Places',
-                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(title = "Shows Google Places within the blue circle", showgrid = FALSE,
-                              zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Update Type Piechart
@@ -265,26 +248,6 @@ shinyServer(function(input, output, session) {
                             zeroline = FALSE, showticklabels = FALSE))
       })
       
-      # Update big Type Piechart
-      output$pie_trash_type2 <- renderPlotly({
-        if(!is.data.frame(analyzation))
-          return()
-        plot_ly(head(trash %>% count(type, sort = T), 10),
-                labels = ~type,
-                values = ~n,
-                name = "Trash distribution",
-                type = "pie"
-        ) %>% 
-          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
-          ) %>%
-          layout(title = 'Trash types within selected area',
-                 legend = list(x = 100, y = 0.5),
-                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, 
-                              zeroline = FALSE, showticklabels = FALSE))
-      })
-      
       # Update Brand Piechart
       output$pie_trash_brand <- renderPlotly({
         if(!is.data.frame(analyzation))
@@ -305,51 +268,20 @@ shinyServer(function(input, output, session) {
                             zeroline = FALSE, showticklabels = FALSE))
       })
       
-      # Update big Brand Piechart
-      output$pie_trash_brand2 <- renderPlotly({
-        if(!is.data.frame(analyzation))
-          return()
-        plot_ly(head(trash %>% count(brand, sort = T), 10),
-                labels = ~brand,
-                values = ~n,
-                name = "Trash distribution",
-                type = "pie"
-        ) %>% 
-          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
-          ) %>%
-          layout(title = 'Trash brands within selected area',
-                 legend = list(x = 100, y = 0.5),
-                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, 
-                              zeroline = FALSE, showticklabels = FALSE))
-      })
-      
       # Informative text
       output$text <- renderText(paste0("Distance: ", input$distanceSlider, " meter. Locations found: ", nrResults, "."))
-      output$story <- renderText(paste(
-        input$trashType, 
-        input$trashBrand, 
-        input$distanceSlider
-      ))
       
       # Add distance circle
       map %>% 
         clearGroup('circles') %>%
-        addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles")
+        addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles", fill = FALSE)
       
       output$graphButton <- renderUI({
         if(!is.data.frame(analyzation))
           return()
           actionButton("showStatistics", HTML("&#10064;"), class = "btn btn-success", style="height: 2.8em")
       })
-      
-      # # Hide markers button
-      # if (!input$checkboxLocationInput) {
-      #   map %>% hideGroup("analysis")
-      # } else {
-      #   map %>% showGroup("analysis")
-      # }
+  
     })
   })
   
@@ -366,7 +298,10 @@ shinyServer(function(input, output, session) {
     click <- input$map_shape_click
     if(is.null(click))
       return()
-    map %>% clearGroup('circles')
+    map %>% clearGroup('circles') %>% clearGroup('placemarkers')
+    
+    # Remove everything else
+    #@TODO 2
   })
   
   # Barchart click
@@ -378,19 +313,32 @@ shinyServer(function(input, output, session) {
     response <- locationSearch(click$x)
     output$details <- renderUI({
       HTML(paste0(
-        '<hr />',
         '<h3>', response$result$name, '</h3>',
-        '<img src="', response$result$icon, '" style="height:3em;position:absolute;transform:translate(-4em,-3em);" />',
+        '<img src="', response$result$icon, '" style="margin:1em;" />',
         '<p><strong>Address:&nbsp </strong>', response$result$formatted_address, '</p>',
         '<p><strong>Phone:&nbsp </strong>', response$result$formatted_phone_number, '</p>',
         '<p><strong>Website:&nbsp </strong><a href="', response$result$website, '">', response$result$website, '</a></p>',
         '<p><strong>Rating:&nbsp </strong>', response$result$rating, '</p>',
-        '<hr />'
+        '<hr/>'
       ))
     })
-    updateNavbarPage(session, "Trashtracking", "Details")
+    
+    map %>%
+      addMarkers(
+        group = 'placemarkers',
+        lng = response$result$geometry$location$lng,
+        lat = response$result$geometry$location$lat,
+        popup = response$result$name,
+        icon = makeIcon(
+          iconUrl = response$result$icon,
+          iconWidth = 38, iconHeight = 40
+        )
+      )
+    
   })
   
+  # Barchart hover
+  #@TODO 1
   
   
   ########################
@@ -401,14 +349,5 @@ shinyServer(function(input, output, session) {
   observeEvent(input$explore, {
     updateNavbarPage(session, "Trashtracking", "Map")
   })
-  
-  # Button Map Page
-  observeEvent(input$showMap, {
-    updateNavbarPage(session, "Trashtracking", "Map")
-  })
-  
-  # Button Statistics Page
-  observeEvent(input$showStatistics, {
-    updateNavbarPage(session, "Trashtracking", "Statistics")
-  })
+
 })
