@@ -86,8 +86,8 @@ shinyUI(navbarPage("Trashtracking",
     # Sidebar
     absolutePanel(id="collapse_sidebar", class = "collapsed-sidebar panel panel-primary", top = "3.7em", right = 0, style = "width: 35em; height: 100%; position: fixed;",
       div(class="panel-body", style="height:100%; display: block",
-        div(style="width:20em; height:16em; background:white;",
-        div(style="position:fixed; z-index:999; background:white; height:16.5em; width:32.5em; top:4em;",
+        div(style="width:20em; height:17em; background:white;",
+        div(style="position:fixed; z-index:999; background:white; height:17.5em; width:32.5em; top:4em;",
             HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
                  &#10010;</button>'),
             htmlOutput("details")

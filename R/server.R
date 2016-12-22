@@ -134,7 +134,7 @@ shinyServer(function(input, output, session) {
         popup = ~as.character(paste(type, brand)),
         icon = makeIcon(
           iconUrl = "http://i.imgur.com/6LJSUkq.png",
-          iconWidth = 38, iconHeight = 40
+          iconWidth = 40, iconHeight = 40
         )
       )
   })
