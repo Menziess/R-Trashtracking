@@ -87,21 +87,20 @@ shinyUI(navbarPage("Trashtracking",
     # Sidebar
     absolutePanel(id="collapse_sidebar", class = "collapsed-sidebar panel panel-primary", top = "3.7em", right = 0, style = "width: 35em; height: 100%; position: fixed;",
       div(class="panel-body", style="height:100%; display: block",
-        div(style="width:20em; height:17em; background:white;",
-          div(style="position:fixed; z-index:999; background:white; height:17.5em; width:32.5em; top:4em;",
-              HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
-                   &#10010;</button>'),
+        # div(style="width:20em; height:17em; background:white;",
+          HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
+               &#10010;</button>'),
+          div(style="position:fixed; z-index:999; background:#ecf0f1; width:32.5em;",
               htmlOutput("details")
-          )
-        ),
+          ),
+        # ),
         conditionalPanel(
           condition = "!output.plot",
+          HTML('<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>'),
           helpText("Click on the map")
         ),
-        HTML('<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>'),
         div(
-          plotlyOutput("plot"),
-          HTML('<a href="#" data-toggle="popover" title="Popover Header" data-content="Some content inside the popover">Toggle popover</a>')
+          plotlyOutput("plot")
         ),
         div(id="pie_type",
           plotlyOutput("pie_trash_type")   

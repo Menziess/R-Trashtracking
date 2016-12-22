@@ -178,6 +178,12 @@ shinyServer(function(input, output, session) {
       places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
       nrResults <- length(places)
       
+      # Add distance circle
+      map %>% 
+        clearGroup('circles') %>%
+        clearGroup('placemarkers') %>%
+        addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles", fillOpacity = 0.05)
+      
       if(nrResults == 0) {
         output$text <- renderText(paste("No places found in this area."))
       } else {
@@ -260,12 +266,6 @@ shinyServer(function(input, output, session) {
       
       # Informative text
       output$text <- renderText(paste0("Distance: ", input$distanceSlider, " meter. Locations found: ", nrResults, "."))
-      
-      # Add distance circle
-      map %>% 
-        clearGroup('circles') %>%
-        clearGroup('placemarkers') %>%
-        addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles", fillOpacity = 0.05)
       
       # Add google markers
       for(i in analyzation$Place) {
