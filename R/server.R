@@ -8,15 +8,18 @@
 
 source('externalAPI.R')
 
+# Data
 trash <- read.csv('../Data/output.csv') 
 trash <- filter(trash, latitude != 0 & latitude != 1 & longitude != 0 & longitude != 1)
 
+# Shiny server
 shinyServer(function(input, output, session) {
   
   ########################
   # Initial Leaflet Map  #
   ########################
 
+  # Empty leaflet map
   output$map <- renderLeaflet({
       leaflet() %>%
       setView(5, 52, 7) %>%
@@ -33,6 +36,7 @@ shinyServer(function(input, output, session) {
   # Reactive Data Filter #
   ########################
   
+  # Reactive data filter
   filteredData <- reactive({
     if (!is.null(input$trashType) && input$trashType != 'All') {
       trash <- subset(trash, trash$type == input$trashType)
@@ -173,8 +177,10 @@ shinyServer(function(input, output, session) {
     if(is.null(click))
       return()
     
+    # Add progress bar
     withProgress(message = "Getting Google Places", value = 0, {
       
+      # Perform google radar search call
       places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
       nrResults <- length(places)
       
@@ -182,16 +188,16 @@ shinyServer(function(input, output, session) {
         output$text <- renderText(paste("No places found in this area."))
       } else {
         
-        # Flatten places
+        # Flatten places from list to dataframe
         places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
         
-        # Preperation
+        # Preperation as in filtering trash based on lat lng location with radius of distanceInLatLng
         incProgress(1/4, detail = "Filtering Trash")
         distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
         trash <- filter(isolate(filteredData()), latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
                         & longitude > click$lng - distanceInLatLng[[2]] & longitude < click$lng + distanceInLatLng[[2]])
         
-        # Analyzation
+        # Analyzation joining, counting distinct trash and places
         incProgress(2/4, detail = "Distance between Trash and Places")
         analyzation <<- analyse(trash, places)
       } 
@@ -261,7 +267,7 @@ shinyServer(function(input, output, session) {
       # Informative text
       output$text <- renderText(paste0("Distance: ", input$distanceSlider, " meter. Locations found: ", nrResults, "."))
       
-      # Add distance circle
+      # Add distance circle on the map
       map %>% 
         setView(click$lng, click$lat, 14) %>%
         clearGroup('circles') %>%
@@ -276,7 +282,12 @@ shinyServer(function(input, output, session) {
             group = 'placemarkers',
             lng = ~Lng,
             lat = ~Lat,
-            popup = ~Name,
+            popup = paste0(
+              '<h3 display: inline-block><img src="', googleData$Icon, '" height=40, width=40" style="margin:0.5em 0.5em 0.5em 0em;" />', googleData$Name, '</h3>',
+              '<p><strong>Address:&nbsp </strong>', googleData$Address, '</p>',
+              '<p><strong>Phone:&nbsp </strong>', googleData$Phone, '</p>',
+              '<p><strong>Website:&nbsp </strong><a href="', googleData$Website, '" target="blank">', googleData$Website, '</a></p>'
+            ),
             icon = makeIcon(
               iconUrl = googleData$Icon,
               iconWidth = 38, iconHeight = 40
@@ -304,8 +315,7 @@ shinyServer(function(input, output, session) {
   
   # Barchart click
   observe({
-    click <- event_data("plotly_hover")
-    
+    click <- event_data("plotly_click")
     if(is.null(click) || !is.data.frame(analyzation))
       return()
     output$details <- renderUI({
@@ -321,12 +331,7 @@ shinyServer(function(input, output, session) {
     
     map %>% 
       setView(googleData[click$x, 2], googleData[click$x, 3], 15)
-    
   })
-  
-  # Barchart hover
-  #@TODO 1
-  
   
   ########################
   #       Buttons        #

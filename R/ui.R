@@ -51,14 +51,14 @@ shinyUI(navbarPage("Trashtracking",
       
       leafletOutput("map", width = "100%", height = "100%"),
       absolutePanel(class = "panel panel-primary", style = "width: 20em;", left = 10, bottom = 0, draggable = F,
-        div(class = "panel-heading", "Controls",
+        div(class = "panel-heading", "Filters",
           div(style="margin-top: 0px;",
             HTML('<button class="btn btn-primary" style="top:0;right:0;position:absolute;height:2.7em;" 
                   data-toggle="collapse" data-target="#collapse_controls">
                   &#10010;</button>')
           )
         ),
-        div(class = "panel-body",
+        div(class = "panel-body", style="padding:0 15px 0 15px;",
           div(id = "collapse_controls", class = "collapse in",
          
             # Trash  
@@ -89,8 +89,7 @@ shinyUI(navbarPage("Trashtracking",
       div(class="panel-body", style="height:100%; display: block",
         div(style="position:fixed;z-index:1;-webkit-transform: translateZ(0);width:32.5em;",
           HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
-               &#10010;</button>'),
-          htmlOutput("details")
+               &#10010;</button>')
         ),
         div(
           plotlyOutput("plot")

@@ -3,8 +3,6 @@ $(document).ready(function(){
     $(".leaflet-right").remove();
     $('#myModal').modal(); 
   }, 1000);
-
-
 });
 
 /* Set the transform translateX to 0 to collapse the sidebar */
