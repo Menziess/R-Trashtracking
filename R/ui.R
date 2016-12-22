@@ -18,15 +18,12 @@ shinyUI(navbarPage("Trashtracking",
   tabPanel("Overview",
     div(class="scatterplot",
       column(12, align = "center",
-             h4("Thanks to the trash hunters we know.."),
-             helpText("To become a hunter download the Trash Hunters app for free, 
-                      now available in the App and Playstore!"),
-             plotOutput("overview"),
-             helpText("This graph shows the all time top 10 brands that are found"),
-             actionButton("explore", "Explore", class = "btn-success btn-lg", style = "margin-top: 2em;")
-             ),
-      column(12, align = "center",
-             dataTableOutput(outputId="M3")
+        h4("Thanks to the trash hunters we know.."),
+        helpText("To become a hunter download the Trash Hunters app for free, 
+                now available in the App and Playstore!"),
+        plotOutput("overview"),
+        helpText("This graph shows the all time top 10 brands that are found"),
+        actionButton("explore", "Explore", class = "btn-success btn-lg", style = "margin-top: 2em;")
       )
     )
   ),

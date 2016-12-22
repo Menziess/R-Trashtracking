@@ -65,6 +65,29 @@ shinyServer(function(input, output, session) {
     selectInput("trashBrand", NULL, c('All', as.character(names$brand)))
   })
   
+  # Google places filter
+  output$locationTypeInput = renderUI({
+    locationTypes <-  c("All" = "?",
+                        "Afhaalrestaurants" = "meal_takeaway",
+                        "Bakkerij" = "bakery",
+                        "Bar" = "bar",
+                        "Bioscoop" = "movie_theater",
+                        "Cafe" = "cafe",
+                        "Casino" = "casino",
+                        "Dierentuin" = "zoo",
+                        "Kampeerplek" = "campground",
+                        "Museum" = "museum",
+                        "Nachtclub" = "night_club",
+                        "Pretpark" = "amusement_park",
+                        "School" = "school",
+                        "Stadion" = "stadium",
+                        "Tankstation" = "gas_station",
+                        "Universiteit" = "university",
+                        "Warenhuis" = "department_store",
+                        "Winkel" = "Store")
+    selectInput("locationType", NULL, locationTypes)
+  })
+  
   #######################
   #       Outputs       #
   #######################
@@ -107,7 +130,11 @@ shinyServer(function(input, output, session) {
       addMarkers(
         clusterId = 'trash',
         clusterOptions = markerClusterOptions(), 
-        popup = ~as.character(paste(type, brand))
+        popup = ~as.character(paste(type, brand)),
+        icon = makeIcon(
+          iconUrl = "http://i.imgur.com/Rn9a3il.png",
+          iconWidth = 38, iconHeight = 40
+        )
       )
   })
   
@@ -127,7 +154,7 @@ shinyServer(function(input, output, session) {
     
     withProgress(message = "Getting Google Places", value = 0, {
       
-      places <- radarSearch(click$lat, click$lng, input$distanceSlider, paste("school", "cafe", "meal_takeaway", "university"))
+      places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
       nrResults <- length(places)
       
       if(nrResults == 0) {
