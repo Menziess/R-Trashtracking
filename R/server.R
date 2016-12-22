@@ -199,70 +199,9 @@ shinyServer(function(input, output, session) {
         
         # Analyzation joining, counting distinct trash and places
         incProgress(2/4, detail = "Distance between Trash and Places")
-        analyzation <<- analyse(trash, places)
+        analyzation <- analyse(trash, places)
+        googleData <<- retrievePlacesDetails(analyzation)
       } 
-      
-      # Update Places Barchart
-      incProgress(3/4, detail = "Render graphs")
-      output$plot <- renderPlotly({
-        if(!is.data.frame(analyzation))
-          return()
-        plot_ly(analyzation,
-                x = ~Place,
-                y = ~Amount,
-                name = "Top 10 places with trash",
-                type = "bar",
-                hoverinfo = "text",
-                text = ~paste(Amount, " trash found")
-        ) %>% 
-        config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-               editable = FALSE, sendData = FALSE, displaylogo = FALSE
-        ) %>%
-        layout(title = 'Top 10 places with most trash nearby',
-               xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-               yaxis = list(title = "All data within the blue circle", showgrid = FALSE,
-                            zeroline = FALSE, showticklabels = FALSE))
-      })
-      
-      # Update Type Piechart
-      output$pie_trash_type <- renderPlotly({
-        if(!is.data.frame(analyzation))
-          return()
-        plot_ly(head(trash %>% count(type, sort = T), 10),
-                labels = ~type,
-                values = ~n,
-                name = "Trash distribution",
-                type = "pie"
-        ) %>% 
-        config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-               editable = FALSE, sendData = FALSE, displaylogo = FALSE
-        ) %>%
-        layout(title = 'Trash types within selected area',
-               legend = list(x = 100, y = 0.5),
-               xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-               yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, 
-                            zeroline = FALSE, showticklabels = FALSE))
-      })
-      
-      # Update Brand Piechart
-      output$pie_trash_brand <- renderPlotly({
-        if(!is.data.frame(analyzation))
-          return()
-        plot_ly(head(trashbrands %>% count(brand, sort = T), 10),
-                labels = ~brand,
-                values = ~n,
-                name = "Trash distribution",
-                type = "pie"
-        ) %>% 
-        config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-               editable = FALSE, sendData = FALSE, displaylogo = FALSE
-        ) %>%
-        layout(title = 'Trash brands within selected area',
-               legend = list(x = 100, y = 0.5),
-               xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-               yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, 
-                            zeroline = FALSE, showticklabels = FALSE))
-      })
       
       # Informative text
       output$text <- renderText(paste0("Distance: ", input$distanceSlider, " meter. Locations found: ", nrResults, "."))
@@ -275,7 +214,7 @@ shinyServer(function(input, output, session) {
         addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles", fillOpacity = 0.05)
       
       # Retrieve detailed places information
-      if (!is.null(googleData <<- retrievePlacesDetails(analyzation))) {
+      if (!is.null(googleData)) {
         map %>%
           addMarkers(
             data = googleData,
@@ -294,6 +233,69 @@ shinyServer(function(input, output, session) {
             )
           )
       }
+      
+      # Update Places Barchart
+      incProgress(3/4, detail = "Render graphs")
+      output$plot <- renderPlotly({
+        if(!is.data.frame(googleData))
+          return()
+        plot_ly(googleData,
+                x = ~Name,
+                y = ~Amount,
+                z = ~Place,
+                name = "Top 10 places with trash",
+                type = "bar",
+                hoverinfo = "text",
+                text = ~paste(Amount, " trash found at ", Name)
+        ) %>% 
+          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+          ) %>%
+          layout(title = 'Top 10 places with most trash nearby',
+                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
+                 yaxis = list(title = "All data within the blue circle", showgrid = FALSE,
+                              zeroline = FALSE, showticklabels = FALSE))
+      })
+      
+      # Update Type Piechart
+      output$pie_trash_type <- renderPlotly({
+        if(!is.data.frame(googleData))
+          return()
+        plot_ly(head(trash %>% count(type, sort = T), 10),
+                labels = ~type,
+                values = ~n,
+                name = "Trash distribution",
+                type = "pie"
+        ) %>% 
+          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+          ) %>%
+          layout(title = 'Trash types within selected area',
+                 legend = list(x = 100, y = 0.5),
+                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, 
+                              zeroline = FALSE, showticklabels = FALSE))
+      })
+      
+      # Update Brand Piechart
+      output$pie_trash_brand <- renderPlotly({
+        if(!is.data.frame(googleData))
+          return()
+        plot_ly(head(trashbrands %>% count(brand, sort = T), 10),
+                labels = ~brand,
+                values = ~n,
+                name = "Trash distribution",
+                type = "pie"
+        ) %>% 
+          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+          ) %>%
+          layout(title = 'Trash brands within selected area',
+                 legend = list(x = 100, y = 0.5),
+                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, 
+                              zeroline = FALSE, showticklabels = FALSE))
+      })
     })
   })
   
@@ -316,21 +318,21 @@ shinyServer(function(input, output, session) {
   # Barchart click
   observe({
     click <- event_data("plotly_click")
-    if(is.null(click) || !is.data.frame(analyzation))
+    if(is.null(click) || !is.data.frame(googleData))
       return()
     output$details <- renderUI({
       HTML(paste0(
         '<hr/>',
-        '<h3 display: inline-block><img src="', googleData[click$x, 4], '" height=40, width=40" />', googleData[click$x, 1], '</h3>',
-        '<p><strong>Address:&nbsp </strong>', googleData[click$x, 5], '</p>',
-        '<p><strong>Phone:&nbsp </strong>', googleData[click$x, 6], '</p>',
-        '<p><strong>Website:&nbsp </strong><a href="', googleData[click$x, 7], '" target="blank">', googleData[click$x, 7], '</a></p>',
+        '<h3 display: inline-block><img src="', googleData[click$z, 4], '" height=40, width=40" />', googleData[click$z, 1], '</h3>',
+        '<p><strong>Address:&nbsp </strong>', googleData[click$z, 5], '</p>',
+        '<p><strong>Phone:&nbsp </strong>', googleData[click$z, 6], '</p>',
+        '<p><strong>Website:&nbsp </strong><a href="', googleData[click$z, 7], '" target="blank">', googleData[click$z, 7], '</a></p>',
         '<hr/>'
       ))
     })
     
     map %>% 
-      setView(googleData[click$x, 2], googleData[click$x, 3], 15)
+      setView(googleData[click$z, 2], googleData[click$z, 3], 15)
   })
   
   ########################

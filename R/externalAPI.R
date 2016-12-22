@@ -50,7 +50,7 @@ analyse <- function(trash, places) {
 
   trash$place_id <- places$place_id[apply(matrix, 1, which.min)]  
   trash <- trash %>% count(place_id, sort = T)
-  total <- merge(trash, places, by=c("place_id", "place_id")) %>% arrange(desc(n))
+  total <- merge(trash, places, by="place_id") %>% arrange(desc(n))
   total <- total[,1:4]
   colnames(total) <- c("Place", "Amount", "Latitude", "Longitude")
 
@@ -61,8 +61,8 @@ analyse <- function(trash, places) {
 retrievePlacesDetails <- function(analyzation = NULL) {
   if (is.null(analyzation) || !nrow(analyzation) > 1)
     return()
-  googleData <- data.frame(matrix(nrow = 0, ncol = 7))
-  colnames(googleData) <- c('Name', 'Lng', 'Lat', 'Icon', 'Address', 'Phone', 'Website')
+  googleData <- data.frame(matrix(nrow = 0, ncol = 8))
+  colnames(googleData) <- c('Name', 'Lng', 'Lat', 'Icon', 'Address', 'Phone', 'Website', 'Place')
   for(i in analyzation$Place) {
     response <- locationSearch(i)
     if (is.null(response)) stop("Response was NULL")
@@ -73,7 +73,11 @@ retrievePlacesDetails <- function(analyzation = NULL) {
     googleData[i,5] <- ifelse(is.null(response$result$formatted_address), "Unknown", response$result$formatted_address)
     googleData[i,6] <- ifelse(is.null(response$result$formatted_phone_number), "Unknown", response$result$formatted_phone_number)
     googleData[i,7] <- ifelse(is.null(response$result$website), "Unknown", response$result$website)
+    googleData[i,8] <- i
   }
+  googleData <- merge(googleData, analyzation, by="Place")
+  rownames(googleData) <- googleData$Place
+  googleData <- googleData[c(2,3,4,5,6,7,8,9,10,1)]
   return (googleData)
 }
 
