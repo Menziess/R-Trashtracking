@@ -126,13 +126,8 @@ shinyServer(function(input, output, session) {
       return()
     
     withProgress(message = "Getting Google Places", value = 0, {
-      school <- radarSearch(click$lat, click$lng, input$distanceSlider, "school")
-      cafe <- radarSearch(click$lat, click$lng, input$distanceSlider, "cafe")
-      takeaway <- radarSearch(click$lat, click$lng, input$distanceSlider, "meal_takeaway")
-      university <- radarSearch(click$lat, click$lng, input$distanceSlider, "university")
-      schools <- c(school$results, university$results)
-      restaurants <- c(cafe$results, takeaway$results)
-      places <- c(school$results, cafe$results, takeaway$results, university$results)
+      
+      places <- radarSearch(click$lat, click$lng, input$distanceSlider, paste("school", "cafe", "meal_takeaway", "university"))
       nrResults <- length(places)
       
       if(nrResults == 0) {
@@ -140,9 +135,7 @@ shinyServer(function(input, output, session) {
       } else {
         
         # Flatten places
-        schools <- do.call(rbind, lapply(schools, data.frame, stringsAsFactors=FALSE))
-        restaurants <- do.call(rbind, lapply(restaurants, data.frame, stringsAsFactors=FALSE))
-        places <- do.call(rbind, lapply(places, data.frame, stringsAsFactors=FALSE))
+        places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
         
         # Preperation
         incProgress(1/4, detail = "Filtering Trash")
@@ -273,7 +266,7 @@ shinyServer(function(input, output, session) {
         '<img src="', response$result$icon, '" style="margin:1em;" />',
         '<p><strong>Address:&nbsp </strong>', response$result$formatted_address, '</p>',
         '<p><strong>Phone:&nbsp </strong>', response$result$formatted_phone_number, '</p>',
-        '<p><strong>Website:&nbsp </strong><a href="', response$result$website, '">', response$result$website, '</a></p>',
+        '<p><strong>Website:&nbsp </strong><a href="', response$result$website, '" target="blank">', response$result$website, '</a></p>',
         '<p><strong>Rating:&nbsp </strong>', response$result$rating, '</p>',
         '<hr/>'
       ))
