@@ -16,8 +16,6 @@ shinyServer(function(input, output, session) {
   ########################
   # Initial Leaflet Map  #
   ########################
-  
-  updateNavbarPage(session, "Trashtracking", "Overview")
 
   output$map <- renderLeaflet({
       leaflet() %>%
@@ -118,20 +116,21 @@ shinyServer(function(input, output, session) {
       xlab("")
     })
     
+    # Modal content
     output$modal <- renderUI({
       HTML(paste0(
-        '<div id="myModal" class="modal fade" role="dialog">',
+        '<div id="myModal" class="modal fade" style="top:15em;" role="dialog">',
         '<div class="modal-dialog">',
         '<div class="modal-content">',
         '<div class="modal-header">',
         '<button type="button" class="close" data-dismiss="modal">&times;</button>',
-        '<h4 class="modal-title">Modal Header</h4>',
+        '<h4 class="modal-title">Hello there!</h4>',
         '</div>',
         '<div class="modal-body">',
-        '<p>Some text in the modal.</p>',
+        '<p>Start by clicking on a blank space on the map.</p>',
         '</div>',
         '<div class="modal-footer">',
-        '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>',
+        '<button type="button" class="btn btn-default" data-dismiss="modal">Got it</button>',
         '</div>',
         '</div>',
         '</div>',
@@ -146,16 +145,17 @@ shinyServer(function(input, output, session) {
   # Input type changes
   observe({
     input$type
+    icon <- makeIcon(
+      iconUrl = "http://i.imgur.com/RrRuWVx.png",
+      iconWidth = 40, iconHeight = 40
+    )
     map <<- leafletProxy("map", data = filteredData()) %>%
       removeMarkerCluster('trash') %>%
       addMarkers(
         clusterId = 'trash',
         clusterOptions = markerClusterOptions(), 
         popup = ~as.character(paste(type, brand)),
-        icon = makeIcon(
-          iconUrl = "http://i.imgur.com/6LJSUkq.png",
-          iconWidth = 40, iconHeight = 40
-        )
+        icon = icon
       )
   })
   
@@ -177,12 +177,6 @@ shinyServer(function(input, output, session) {
       
       places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
       nrResults <- length(places)
-      
-      # Add distance circle
-      map %>% 
-        clearGroup('circles') %>%
-        clearGroup('placemarkers') %>%
-        addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles", fillOpacity = 0.05)
       
       if(nrResults == 0) {
         output$text <- renderText(paste("No places found in this area."))
@@ -266,6 +260,13 @@ shinyServer(function(input, output, session) {
       
       # Informative text
       output$text <- renderText(paste0("Distance: ", input$distanceSlider, " meter. Locations found: ", nrResults, "."))
+      
+      # Add distance circle
+      map %>% 
+        setView(click$lng, click$lat, 14) %>%
+        clearGroup('circles') %>%
+        clearGroup('placemarkers') %>%
+        addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles", fillOpacity = 0.05)
       
       # Add google markers
       for(i in analyzation$Place) {

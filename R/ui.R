@@ -71,7 +71,7 @@ shinyUI(navbarPage("Trashtracking",
             hr(), 
             
             # Places
-            h4("Google Places"),
+            helpText("What are you searching for?"),
             uiOutput("locationTypeInput"),
             helpText("Distance in meters"),
             sliderInput("distanceSlider", NULL, min = 100, max = 2500, value = 1000)
@@ -87,17 +87,9 @@ shinyUI(navbarPage("Trashtracking",
     # Sidebar
     absolutePanel(id="collapse_sidebar", class = "collapsed-sidebar panel panel-primary", top = "3.7em", right = 0, style = "width: 35em; height: 100%; position: fixed;",
       div(class="panel-body", style="height:100%; display: block",
-        # div(style="width:20em; height:17em; background:white;",
+        div(style="position:fixed;z-index:1;-webkit-transform: translateZ(0);width:32.5em;",
           HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
-               &#10010;</button>'),
-          div(style="position:fixed; z-index:999; background:#ecf0f1; width:32.5em;",
-              htmlOutput("details")
-          ),
-        # ),
-        conditionalPanel(
-          condition = "!output.plot",
-          HTML('<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>'),
-          helpText("Click on the map")
+               &#10010;</button>')
         ),
         div(
           plotlyOutput("plot")
