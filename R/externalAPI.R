@@ -57,7 +57,7 @@ analyse <- function(trash, places) {
   return (head(total, 10))
 }
 
-# Convert meters to bearing
+# Convert meters to distance in latitude and distance in longitude
 metersToLatLng <- function(lat, lng, meters) {
   R=111111                    # Rough amount of meters per degree
   dLat = abs(meters/R)        # Difference in latitude
