@@ -60,8 +60,9 @@ shinyServer(function(input, output, session) {
   })
   
   # Trash brand
+  trashbrands <- filter(trash,grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand))
   output$trashBrandInput = renderUI({
-    names <- distinct(trash, brand)
+    names <- distinct(trashbrands, brand)
     selectInput("trashBrand", NULL, c('All', as.character(names$brand)))
   })
   
@@ -221,7 +222,7 @@ shinyServer(function(input, output, session) {
       output$pie_trash_brand <- renderPlotly({
         if(!is.data.frame(analyzation))
           return()
-        plot_ly(head(trash %>% count(brand, sort = T), 10),
+        plot_ly(head(trashbrands %>% count(brand, sort = T), 10),
                 labels = ~brand,
                 values = ~n,
                 name = "Trash distribution",

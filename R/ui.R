@@ -61,10 +61,11 @@ shinyUI(navbarPage("Trashtracking",
           div(id = "collapse_controls", class = "collapse in",
          
             # Trash  
-            h4("Trash"),
+            helpText("Filter dates"),
             dateRangeInput("daterange", NULL, start = "2015-05-31", end = "2016-03-15"),
-            helpText("Choose type or brand"),
+            helpText("Choose type"),
             uiOutput("trashTypeInput"),
+            helpText("Choose brand"),
             uiOutput("trashBrandInput"),
             hr(), 
             
