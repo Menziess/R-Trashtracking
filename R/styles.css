@@ -61,3 +61,24 @@ html {
        -o-transform: translateX(30em);
           transform: translateX(30em);
 }
+
+.marker-cluster-small {
+  background-color: rgba(162,205,90, 0.6) !important;
+}
+.marker-cluster-small div {
+  background-color: rgba(162,205,90, 0.6) !important;
+}
+
+.marker-cluster-medium {
+  background-color: rgba(162,205,90, 0.6) !important;
+}
+.marker-cluster-medium div {
+  background-color: rgba(162,205,90, 0.6) !important;
+}
+
+.marker-cluster-large {
+  background-color: rgba(162,205,90, 0.6) !important;
+}
+.marker-cluster-large div {
+  background-color: rgba(162,205,90, 0.6) !important;
+}
