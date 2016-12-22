@@ -132,7 +132,7 @@ shinyServer(function(input, output, session) {
         clusterOptions = markerClusterOptions(), 
         popup = ~as.character(paste(type, brand)),
         icon = makeIcon(
-          iconUrl = "http://i.imgur.com/Rn9a3il.png",
+          iconUrl = "http://i.imgur.com/6LJSUkq.png",
           iconWidth = 38, iconHeight = 40
         )
       )
