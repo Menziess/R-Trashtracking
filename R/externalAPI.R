@@ -41,7 +41,7 @@ locationSearch <- function(placeid) {
 
 # API response analysis function to associate trash with places
 analyse <- function(trash, places) {
-  if(nrow(trash) < 1 || nrow(places) < 1) return (NULL)
+  if(nrow(trash) < 1 || is.null(places) || nrow(places) < 1) return (NULL)
   matrix <- distm(
     trash[,c('longitude','latitude')], 
     places[,c('geometry.location.lng','geometry.location.lat')], 
