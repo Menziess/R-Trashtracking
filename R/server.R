@@ -268,17 +268,17 @@ shinyServer(function(input, output, session) {
         clearGroup('placemarkers') %>%
         addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles", fillOpacity = 0.05)
       
-      # Add google markers
-      for(i in analyzation$Place) {
-        response <- locationSearch(i)
+      # Retrieve detailed places information
+      if (!is.null(googleData <<- retrievePlacesDetails(analyzation))) {
         map %>%
           addMarkers(
+            data = googleData,
             group = 'placemarkers',
-            lng = response$result$geometry$location$lng,
-            lat = response$result$geometry$location$lat,
-            popup = response$result$name,
+            lng = ~Lng,
+            lat = ~Lat,
+            popup = ~Name,
             icon = makeIcon(
-              iconUrl = response$result$icon,
+              iconUrl = googleData$Icon,
               iconWidth = 38, iconHeight = 40
             )
           )
@@ -304,24 +304,23 @@ shinyServer(function(input, output, session) {
   
   # Barchart click
   observe({
-    click <- event_data("plotly_click")
+    click <- event_data("plotly_hover")
     
     if(is.null(click) || !is.data.frame(analyzation))
       return()
-    response <- locationSearch(click$x)
     output$details <- renderUI({
       HTML(paste0(
         '<hr/>',
-        '<h3 display: inline-block><img src="', response$result$icon, '" height=40, width=40" />', response$result$name, '</h3>',
-        '<p><strong>Address:&nbsp </strong>', response$result$formatted_address, '</p>',
-        '<p><strong>Phone:&nbsp </strong>', response$result$formatted_phone_number, '</p>',
-        '<p><strong>Website:&nbsp </strong><a href="', response$result$website, '" target="blank">', response$result$website, '</a></p>',
+        '<h3 display: inline-block><img src="', googleData[click$x, 4], '" height=40, width=40" />', googleData[click$x, 1], '</h3>',
+        '<p><strong>Address:&nbsp </strong>', googleData[click$x, 5], '</p>',
+        '<p><strong>Phone:&nbsp </strong>', googleData[click$x, 6], '</p>',
+        '<p><strong>Website:&nbsp </strong><a href="', googleData[click$x, 7], '" target="blank">', googleData[click$x, 7], '</a></p>',
         '<hr/>'
       ))
     })
     
     map %>% 
-      setView(response$result$geometry$location$lng, response$result$geometry$location$lat, 15)
+      setView(googleData[click$x, 2], googleData[click$x, 3], 15)
     
   })
   

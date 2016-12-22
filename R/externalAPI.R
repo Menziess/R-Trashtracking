@@ -57,6 +57,26 @@ analyse <- function(trash, places) {
   return (head(total, 10))
 }
 
+# Returns dataframe with detailed places information
+retrievePlacesDetails <- function(analyzation = NULL) {
+  if (is.null(analyzation) || !nrow(analyzation) > 1)
+    return()
+  googleData <- data.frame(matrix(nrow = 0, ncol = 7))
+  colnames(googleData) <- c('Name', 'Lng', 'Lat', 'Icon', 'Address', 'Phone', 'Website')
+  for(i in analyzation$Place) {
+    response <- locationSearch(i)
+    if (is.null(response)) stop("Response was NULL")
+    googleData[i,1] <- ifelse(is.null(response$result$name), "Unknown", response$result$name)
+    googleData[i,2] <- ifelse(is.null(response$result$geometry$location$lng), 0, response$result$geometry$location$lng)
+    googleData[i,3] <- ifelse(is.null(response$result$geometry$location$lat), 0, response$result$geometry$location$lat)
+    googleData[i,4] <- ifelse(is.null(response$result$icon), "https://cdn4.iconfinder.com/data/icons/online-store/300/404-512.png", response$result$icon)
+    googleData[i,5] <- ifelse(is.null(response$result$formatted_address), "Unknown", response$result$formatted_address)
+    googleData[i,6] <- ifelse(is.null(response$result$formatted_phone_number), "Unknown", response$result$formatted_phone_number)
+    googleData[i,7] <- ifelse(is.null(response$result$website), "Unknown", response$result$website)
+  }
+  return (googleData)
+}
+
 # Convert meters to distance in latitude and distance in longitude
 metersToLatLng <- function(lat, lng, meters) {
   R=111111                    # Rough amount of meters per degree

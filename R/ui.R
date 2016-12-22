@@ -89,7 +89,8 @@ shinyUI(navbarPage("Trashtracking",
       div(class="panel-body", style="height:100%; display: block",
         div(style="position:fixed;z-index:1;-webkit-transform: translateZ(0);width:32.5em;",
           HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
-               &#10010;</button>')
+               &#10010;</button>'),
+          htmlOutput("details")
         ),
         div(
           plotlyOutput("plot")
