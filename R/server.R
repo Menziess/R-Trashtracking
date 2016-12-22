@@ -269,12 +269,13 @@ shinyServer(function(input, output, session) {
     response <- locationSearch(click$x)
     output$details <- renderUI({
       HTML(paste0(
-        '<h3>', response$result$name, '</h3>',
-        '<img src="', response$result$icon, '" style="margin:1em;" />',
+        '<hr/>',
+        '<h3 display: inline-block><img src="', response$result$icon, '" height=40, width=40" />', response$result$name, '</h3>',
+       ## '',
         '<p><strong>Address:&nbsp </strong>', response$result$formatted_address, '</p>',
         '<p><strong>Phone:&nbsp </strong>', response$result$formatted_phone_number, '</p>',
         '<p><strong>Website:&nbsp </strong><a href="', response$result$website, '">', response$result$website, '</a></p>',
-        '<p><strong>Rating:&nbsp </strong>', response$result$rating, '</p>',
+        ##'<p><strong>Rating:&nbsp </strong>', response$result$rating, '</p>',
         '<hr/>'
       ))
     })
