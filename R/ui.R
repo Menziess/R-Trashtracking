@@ -12,6 +12,15 @@ shinyUI(navbarPage("Trashtracking",
   id = "Trashtracking",
   
   ########################
+  #   Links and Scripts  #
+  ########################
+  
+  tags$head(
+    includeCSS("styles.css"),
+    includeScript("script.js")
+  ),
+  
+  ########################
   #       Overview      #
   ########################
   
@@ -35,21 +44,14 @@ shinyUI(navbarPage("Trashtracking",
   tabPanel("Map", 
     htmlOutput("modal"),
     div(class="map",
-        
-      ########################
-      #   Links and Scripts  #
-      ########################
-        
-      tags$head(
-        includeCSS("styles.css"),
-        includeScript("script.js")
-      ),
     
       ########################
       #       Leaflet        #
       ########################
       
       leafletOutput("map", width = "100%", height = "100%"),
+      
+      # Filter panel
       absolutePanel(class = "panel panel-primary", style = "width: 20em;", left = 10, bottom = 0, draggable = F,
         div(class = "panel-heading", "Filters",
           div(style="margin-top: 0px;",
@@ -83,13 +85,19 @@ shinyUI(navbarPage("Trashtracking",
         )
       )
     ),
-    
-    # Sidebar
+
+    # Sidebar panel
     absolutePanel(id="collapse_sidebar", class = "collapsed-sidebar panel panel-primary", top = "3.7em", right = 0, style = "width: 35em; height: 100%; position: fixed;",
       div(class="panel-body", style="height:100%; display: block",
         div(style="position:fixed;z-index:1;-webkit-transform: translateZ(0);width:32.5em;",
           HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
                &#10010;</button>')
+        ),
+        conditionalPanel(
+          condition = "!output.plot",
+          HTML(
+            '<img src="instruction1.png" />'
+          )
         ),
         div(
           plotlyOutput("plot")

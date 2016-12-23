@@ -1,14 +1,17 @@
+/* Prevents scrollbar from moving entire view */
 html {
   width:100vw;
   overflow-x:hidden;
 }
 
+/* Overview styling */
 .overview {
   left: 0;
   right: 0;
   height: 100%;
 }
 
+/* Map styling */
 .map {
   position: fixed;
   float: left;
@@ -21,31 +24,43 @@ html {
   background-color: whitesmoke;
 }
 
+/* Tabel overflow behaviour */
 .tabel {
   overflow-y: auto;
   overflow-x: scroll;
 }
 
+/* Margins for piecharts */
 .pie {
   margin: 10px;
 }
 
+/* Gives the user impression that something will be placed miliseconds before */
 .scatterplot {
   background-color: whitesmoke;
 }
 
+/* Changes cursor to pointer when hovering over plotly */
 .cursor-crosshair {
   cursor: pointer !important;
 }
 
+/* Prevents pointer events that cause errors with plotly piecharts */
 .surface {
   pointer-events: none !important;
 }
 
+/* Hides annoying leaflet ad */
 .leaflet-right {
   display: none;
 }
 
+/* Change cursor when over entire map */
+.leaflet-container {
+  cursor: pointer !important;
+}
+
+/* Sidebar collapse animation */
 #collapse_sidebar {
   overflow-x: hidden;
   -webkit-transition: -webkit-transform 0.3s;
@@ -54,6 +69,7 @@ html {
           transition: transform 0.3s;
 }
 
+/* Sidebar collapse offset */
 .collapsed-sidebar {
   -webkit-transform: translateX(30em);
      -moz-transform: translateX(30em);
@@ -62,23 +78,32 @@ html {
           transform: translateX(30em);
 }
 
+/* Marker cluster recolor */
 .marker-cluster-small {
   background-color: rgba(162,205,90, 0.6) !important;
 }
 .marker-cluster-small div {
   background-color: rgba(162,205,90, 0.6) !important;
 }
-
 .marker-cluster-medium {
   background-color: rgba(162,205,90, 0.6) !important;
 }
 .marker-cluster-medium div {
   background-color: rgba(162,205,90, 0.6) !important;
 }
-
 .marker-cluster-large {
   background-color: rgba(162,205,90, 0.6) !important;
 }
 .marker-cluster-large div {
   background-color: rgba(162,205,90, 0.6) !important;
+}
+
+/* Hide errors for users */
+.shiny-output-error { 
+  visibility: hidden; 
+  
+}
+.shiny-output-error:before {
+  visibility: visible;
+  content: 'An error occurred. Please contact the admin.'; 
 }

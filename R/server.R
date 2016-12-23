@@ -123,15 +123,18 @@ shinyServer(function(input, output, session) {
     # Modal content
     output$modal <- renderUI({
       HTML(paste0(
-        '<div id="myModal" class="modal fade" style="top:15em;" role="dialog">',
+        '<div id="myModal" class="modal fade" style="top:1em;" role="dialog">',
         '<div class="modal-dialog">',
         '<div class="modal-content">',
         '<div class="modal-header">',
         '<button type="button" class="close" data-dismiss="modal">&times;</button>',
         '<h4 class="modal-title">Hello there!</h4>',
         '</div>',
-        '<div class="modal-body">',
+        '<div class="modal-body text-center">',
         '<p>Start by clicking on a blank space on the map.</p>',
+        '<img src="instruction1.png" />',
+        '<p style="margin-top: 1em;">The system will locate interesting places that may a correlation with the trash in that area.</p>',
+        '<img src="instruction2.png" />',
         '</div>',
         '<div class="modal-footer">',
         '<button type="button" class="btn btn-default" data-dismiss="modal">Got it</button>',
@@ -150,7 +153,7 @@ shinyServer(function(input, output, session) {
   observe({
     input$type
     icon <- makeIcon(
-      iconUrl = "http://i.imgur.com/RrRuWVx.png",
+      iconUrl = "marker.png",
       iconWidth = 40, iconHeight = 40
     )
     map <<- leafletProxy("map", data = filteredData()) %>%
@@ -250,7 +253,7 @@ shinyServer(function(input, output, session) {
         ) %>% 
           config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
                  editable = FALSE, sendData = FALSE, displaylogo = FALSE
-          ) %>%
+        ) %>%
           layout(title = 'Top 10 places with most trash nearby',
                  xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
                  yaxis = list(title = "All data within the blue circle", showgrid = FALSE,
@@ -269,7 +272,7 @@ shinyServer(function(input, output, session) {
         ) %>% 
           config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
                  editable = FALSE, sendData = FALSE, displaylogo = FALSE
-          ) %>%
+        ) %>%
           layout(title = 'Trash types within selected area',
                  legend = list(x = 100, y = 0.5),
                  xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
@@ -279,8 +282,8 @@ shinyServer(function(input, output, session) {
       
       # Update Brand Piechart
       output$pie_trash_brand <- renderPlotly({
-        if(!is.data.frame(googleData))
-          return()
+        if(!is.data.frame(googleData)) 
+          return ()
         plot_ly(head(trashbrands %>% count(brand, sort = T), 10),
                 labels = ~brand,
                 values = ~n,
@@ -289,7 +292,7 @@ shinyServer(function(input, output, session) {
         ) %>% 
           config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
                  editable = FALSE, sendData = FALSE, displaylogo = FALSE
-          ) %>%
+        ) %>%
           layout(title = 'Trash brands within selected area',
                  legend = list(x = 100, y = 0.5),
                  xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
