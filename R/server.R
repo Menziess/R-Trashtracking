@@ -246,18 +246,17 @@ shinyServer(function(input, output, session) {
                 x = ~Name,
                 y = ~Amount,
                 z = ~Place,
-                name = "Top 10 places with trash",
+                name = "Top 10 trash found at google places",
                 type = "bar",
                 hoverinfo = "text",
-                text = ~paste(Amount, " trash found at ", Name)
+                text = ~paste(Amount, "trash found at", Name)
         ) %>% 
           config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
                  editable = FALSE, sendData = FALSE, displaylogo = FALSE
         ) %>%
-          layout(title = 'Top 10 places with most trash nearby',
+          layout(title = paste(sum(googleData$Amount), "trash near", nrow(googleData), "places."),
                  xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
-                 yaxis = list(title = "All data within the blue circle", showgrid = FALSE,
-                              zeroline = FALSE, showticklabels = FALSE))
+                 yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Update Type Piechart
@@ -275,16 +274,15 @@ shinyServer(function(input, output, session) {
         ) %>%
           layout(title = 'Trash types within selected area',
                  legend = list(x = 100, y = 0.5),
-                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(title = "Shows trash types within the blue circle", showgrid = FALSE, 
-                              zeroline = FALSE, showticklabels = FALSE))
+                 xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Update Brand Piechart
       output$pie_trash_brand <- renderPlotly({
         if(!is.data.frame(googleData)) 
           return ()
-        plot_ly(head(trashbrands %>% count(brand, sort = T), 10),
+        plot_ly(head(trash %>% count(brand, sort = T), 10),
                 labels = ~brand,
                 values = ~n,
                 name = "Trash distribution",
@@ -295,9 +293,8 @@ shinyServer(function(input, output, session) {
         ) %>%
           layout(title = 'Trash brands within selected area',
                  legend = list(x = 100, y = 0.5),
-                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(title = "Shows trash brands within the blue circle", showgrid = FALSE, 
-                              zeroline = FALSE, showticklabels = FALSE))
+                 xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
       })
     })
   })
@@ -307,7 +304,7 @@ shinyServer(function(input, output, session) {
     click <- input$map_marker_click
     if(is.null(click))
       return()
-    output$text <- renderText(paste("Marker: Lat ", click$lat, "Lng ", click$lng))
+    output$text <- renderText(paste("Marker at Lat:", round(click$lat, 2), "- Lng:", round(click$lng, 2)))
   })
   
   # Shape click

@@ -91,12 +91,14 @@ shinyUI(navbarPage("Trashtracking",
       div(class="panel-body", style="height:100%; display: block",
         div(style="position:fixed;z-index:1;-webkit-transform: translateZ(0);width:32.5em;",
           HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
-               &#10010;</button>')
+               &#10010;</button>'),
+          HTML('<button class="btn btn-info" data-toggle="modal" data-target="#myModal" style="height:2.7em;width:3.1em;">
+               ?</button>')
         ),
         conditionalPanel(
           condition = "!output.plot",
-          HTML(
-            '<img src="instruction1.png" />'
+          div(class="text-center", style="transform:translateY(4em);",
+            h2("Click on the map to proceed")
           )
         ),
         div(
