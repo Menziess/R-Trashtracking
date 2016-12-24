@@ -43,9 +43,9 @@ shinyUI(navbarPage("Trashtracking",
   
   tabPanel("Map", 
     htmlOutput("modal"),
-    div(style="position:absolute;z-index:1;",
-      HTML('<button class="btn btn-info" data-toggle="modal" data-target="#myModal" style="height:2.7em;width:3.1em;transform:translate(2em, -1.3em)">
-               ?</button>')
+    div(class="leaflet-bar", style="position:absolute;z-index:1;transform:translate(2em, -1em);",
+      HTML('<button class="btn btn-info" data-toggle="modal" data-target="#myModal" style="height:2.7em;width:3.1em;">
+            ?</button>')
     ),
     div(class="map",
     
@@ -99,18 +99,35 @@ shinyUI(navbarPage("Trashtracking",
         ),
         conditionalPanel(
           condition = "!output.plot",
-          div(class="text-center", style="transform:translateY(4em);",
-            h2("Click on the map to proceed")
+          div(class="text-center text-success", style="transform:translateY(4em);",
+            h3("Click on the map to proceed")
           )
         ),
-        div(
-          plotlyOutput("plot")
+        conditionalPanel(
+          condition = "input.map_click",
+          div(
+            plotlyOutput("plot")
+          ),
+          div(id="pie_type",
+            plotlyOutput("pie_trash_type")   
+          ),
+          div(id="pie_brand_type",
+            plotlyOutput("pie_trash_brand")
+          )
         ),
-        div(id="pie_type",
-          plotlyOutput("pie_trash_type")   
-        ),
-        div(id="pie_brand_type",
-          plotlyOutput("pie_trash_brand")
+        conditionalPanel(
+          condition="true",
+          div(class="form-inline", style="position:fixed;top:60em;background:white;display:inline;",
+            div(class="form-group",
+              textInput("lat", NULL, NULL, 200, "lat")
+            ),
+            div(class="form-group",
+              textInput("lng", NULL, NULL, 200, "lng")
+            ),
+            div(class="form-group", style="display:inline-block;",
+              actionButton("latlng", "Go", NULL)
+            )
+          )
         )
       )
     )

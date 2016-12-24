@@ -179,124 +179,7 @@ shinyServer(function(input, output, session) {
     click <- input$map_click
     if(is.null(click))
       return()
-    
-    # Add progress bar
-    withProgress(message = "Getting Google Places", value = 0, {
-      
-      # Perform google radar search call
-      places <- radarSearch(click$lat, click$lng, input$distanceSlider, input$locationType)
-      nrResults <- length(places)
-      
-      if(nrResults == 0) {
-        output$text <- renderText(paste("No places found in this area."))
-      } else {
-        
-        # Flatten places from list to dataframe
-        places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
-        
-        # Preperation as in filtering trash based on lat lng location with radius of distanceInLatLng
-        incProgress(1/4, detail = "Filtering Trash")
-        distanceInLatLng <- metersToLatLng(click$lat, click$lng, input$distanceSlider)
-        trash <- filter(isolate(filteredData()), latitude > click$lat - distanceInLatLng[[1]] & latitude < click$lat + distanceInLatLng[[1]]
-                        & longitude > click$lng - distanceInLatLng[[2]] & longitude < click$lng + distanceInLatLng[[2]])
-        
-        # Analyzation joining, counting distinct trash and places
-        incProgress(2/4, detail = "Distance between Trash and Places")
-        analyzation <- analyse(trash, places)
-        googleData <<- retrievePlacesDetails(analyzation)
-      } 
-      
-      # Informative text
-      output$text <- renderText(paste0("Distance: ", input$distanceSlider, " meter. Locations found: ", nrResults, "."))
-      
-      # Add distance circle on the map
-      map %>% 
-        setView(click$lng, click$lat, 14) %>%
-        clearGroup('circles') %>%
-        clearGroup('placemarkers') %>%
-        addCircles(lat = click$lat, lng = click$lng, radius = input$distanceSlider, group = "circles", fillOpacity = 0.05)
-      
-      # Retrieve detailed places information
-      if (!is.null(googleData)) {
-        map %>%
-          addMarkers(
-            data = googleData,
-            group = 'placemarkers',
-            lng = ~Lng,
-            lat = ~Lat,
-            popup = paste0(
-              '<h3 display: inline-block><img src="', googleData$Icon, '" height=40, width=40" style="margin:0.5em 0.5em 0.5em 0em;" />', googleData$Name, '</h3>',
-              '<p><strong>Address:&nbsp </strong>', googleData$Address, '</p>',
-              '<p><strong>Phone:&nbsp </strong>', googleData$Phone, '</p>',
-              '<p><strong>Website:&nbsp </strong><a href="', googleData$Website, '" target="blank">', googleData$Website, '</a></p>'
-            ),
-            icon = makeIcon(
-              iconUrl = googleData$Icon,
-              iconWidth = 38, iconHeight = 40
-            )
-          )
-      }
-      
-      # Update Places Barchart
-      incProgress(3/4, detail = "Render graphs")
-      output$plot <- renderPlotly({
-        if(!is.data.frame(googleData))
-          return()
-        plot_ly(googleData,
-                x = ~Name,
-                y = ~Amount,
-                z = ~Place,
-                name = "Top 10 trash found at google places",
-                type = "bar",
-                hoverinfo = "text",
-                text = ~paste(Amount, "trash found at", Name)
-        ) %>% 
-          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
-        ) %>%
-          layout(title = paste(sum(googleData$Amount), "trash near", nrow(googleData), "places."),
-                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
-                 yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-      })
-      
-      # Update Type Piechart
-      output$pie_trash_type <- renderPlotly({
-        if(!is.data.frame(googleData))
-          return()
-        plot_ly(head(trash %>% count(type, sort = T), 10),
-                labels = ~type,
-                values = ~n,
-                name = "Trash distribution",
-                type = "pie"
-        ) %>% 
-          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
-        ) %>%
-          layout(title = 'Trash types within selected area',
-                 legend = list(x = 100, y = 0.5),
-                 xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-      })
-      
-      # Update Brand Piechart
-      output$pie_trash_brand <- renderPlotly({
-        if(!is.data.frame(googleData)) 
-          return ()
-        plot_ly(head(trash %>% count(brand, sort = T), 10),
-                labels = ~brand,
-                values = ~n,
-                name = "Trash distribution",
-                type = "pie"
-        ) %>% 
-          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
-        ) %>%
-          layout(title = 'Trash brands within selected area',
-                 legend = list(x = 100, y = 0.5),
-                 xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-      })
-    })
+    performMapSearch(click$lat, click$lng)
   })
   
   # Marker click
@@ -335,13 +218,149 @@ shinyServer(function(input, output, session) {
       setView(googleData[click$z, 2], googleData[click$z, 3], 15)
   })
   
+  
   ########################
   #       Buttons        #
   ########################
+  
+  # Dev actionbutton
+  observeEvent(input$latlng, {
+    if(input$lat == "" || input$lng == "")
+      return()
+    if((lat <- as.double(input$lat)) && (lng <- as.double(input$lng)))
+      # lat <- as.double(input$lat)
+      # lng <- as.double(input$lng)
+      performMapSearch(lat, lng)
+  })
   
   # Button Explore
   observeEvent(input$explore, {
     updateNavbarPage(session, "Trashtracking", "Map")
   })
-
+  
+  
+  ########################
+  #       Map Search     #
+  ########################
+  
+  performMapSearch <- function(lat, lng) {
+    # Add progress bar
+    withProgress(message = "Getting Google Places", value = 0, {
+      
+      # Perform google radar search call
+      places <- radarSearch(lat, lng, input$distanceSlider, input$locationType)
+      nrResults <- length(places)
+      
+      if(nrResults == 0) {
+        output$text <- renderText(paste("No places found in this area."))
+      } else {
+        
+        # Flatten places from list to dataframe
+        places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
+        
+        # Preperation as in filtering trash based on lat lng location with radius of distanceInLatLng
+        incProgress(1/4, detail = "Filtering Trash")
+        distanceInLatLng <- metersToLatLng(lat, lng, input$distanceSlider)
+        trash <- filter(isolate(filteredData()), latitude > lat - distanceInLatLng[[1]] & latitude < lat + distanceInLatLng[[1]]
+                        & longitude > lng - distanceInLatLng[[2]] & longitude < lng + distanceInLatLng[[2]])
+        
+        # Analyzation joining, counting distinct trash and places
+        incProgress(2/4, detail = "Distance between Trash and Places")
+        analyzation <- analyse(trash, places)
+        googleData <<- retrievePlacesDetails(analyzation)
+      } 
+      
+      # Informative text
+      output$text <- renderText(paste0("Distance: ", input$distanceSlider, " meter. Locations found: ", nrResults, "."))
+      
+      # Add distance circle on the map
+      map %>% 
+        setView(lng, lat, 14) %>%
+        clearGroup('circles') %>%
+        clearGroup('placemarkers') %>%
+        addCircles(lat = lat, lng = lng, radius = input$distanceSlider, group = "circles", fillOpacity = 0.05)
+      
+      # Retrieve detailed places information
+      if (!is.null(googleData)) {
+        map %>%
+          addMarkers(
+            data = googleData,
+            group = 'placemarkers',
+            lng = ~Lng,
+            lat = ~Lat,
+            popup = paste0(
+              '<h3 display: inline-block><img src="', googleData$Icon, '" height=40, width=40" style="margin:0.5em 0.5em 0.5em 0em;" />', googleData$Name, '</h3>',
+              '<p><strong>Address:&nbsp </strong>', googleData$Address, '</p>',
+              '<p><strong>Phone:&nbsp </strong>', googleData$Phone, '</p>',
+              '<p><strong>Website:&nbsp </strong><a href="', googleData$Website, '" target="blank">', googleData$Website, '</a></p>'
+            ),
+            icon = makeIcon(
+              iconUrl = googleData$Icon,
+              iconWidth = 38, iconHeight = 40
+            )
+          )
+      }
+      
+      # Update Places Barchart
+      incProgress(3/4, detail = "Render graphs")
+      output$plot <- renderPlotly({
+        if(!is.data.frame(googleData))
+          return()
+        plot_ly(googleData,
+                x = ~Name,
+                y = ~Amount,
+                z = ~Place,
+                name = "Top 10 trash found at google places",
+                type = "bar",
+                hoverinfo = "text",
+                text = ~paste(Amount, "trash found at", Name)
+        ) %>% 
+          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+          ) %>%
+          layout(title = paste(sum(googleData$Amount), "trash near", nrow(googleData), "places."),
+                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
+                 yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+      })
+      
+      # Update Type Piechart
+      output$pie_trash_type <- renderPlotly({
+        if(!is.data.frame(googleData))
+          return()
+        plot_ly(head(trash %>% count(type, sort = T), 10),
+                labels = ~type,
+                values = ~n,
+                name = "Trash distribution",
+                type = "pie"
+        ) %>% 
+          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+          ) %>%
+          layout(title = 'Trash types within selected area',
+                 legend = list(x = 100, y = 0.5),
+                 xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+      })
+      
+      # Update Brand Piechart
+      output$pie_trash_brand <- renderPlotly({
+        if(!is.data.frame(googleData)) 
+          return ()
+        plot_ly(head(trash %>% count(brand, sort = T), 10),
+                labels = ~brand,
+                values = ~n,
+                name = "Trash distribution",
+                type = "pie"
+        ) %>% 
+          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
+          ) %>%
+          layout(title = 'Trash brands within selected area',
+                 legend = list(x = 100, y = 0.5),
+                 xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                 yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+      })
+    })
+  } 
 })
+
