@@ -43,6 +43,10 @@ shinyUI(navbarPage("Trashtracking",
   
   tabPanel("Map", 
     htmlOutput("modal"),
+    div(style="position:absolute;z-index:1;",
+      HTML('<button class="btn btn-info" data-toggle="modal" data-target="#myModal" style="height:2.7em;width:3.1em;transform:translate(2em, -1.3em)">
+               ?</button>')
+    ),
     div(class="map",
     
       ########################
@@ -91,9 +95,7 @@ shinyUI(navbarPage("Trashtracking",
       div(class="panel-body", style="height:100%; display: block",
         div(style="position:fixed;z-index:1;-webkit-transform: translateZ(0);width:32.5em;",
           HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
-               &#10010;</button>'),
-          HTML('<button class="btn btn-info" data-toggle="modal" data-target="#myModal" style="height:2.7em;width:3.1em;">
-               ?</button>')
+               &#10010;</button>')
         ),
         conditionalPanel(
           condition = "!output.plot",
