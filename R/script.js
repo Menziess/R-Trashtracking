@@ -3,7 +3,7 @@ $(document).ready(function(){
     $(".leaflet-right").remove();
   }, 1000);
   
-  $(window).ready(function(){
+  $(window).load(function(){
     setTimeout(function() {
       if (typeof(Storage) !== "undefined") {
         if (!localStorage.getItem("help")) {
@@ -11,7 +11,7 @@ $(document).ready(function(){
           localStorage.setItem("help", true);
         }
       }
-    }, 2000);
+    }, 3000);
   });
 });
 

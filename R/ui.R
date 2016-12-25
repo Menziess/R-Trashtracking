@@ -59,9 +59,13 @@ shinyUI(navbarPage("Trashtracking",
       absolutePanel(class = "panel panel-primary", style = "width: 20em;", left = 10, bottom = 0, draggable = F,
         div(class = "panel-heading", "Filters",
           div(style="margin-top: 0px;",
-            HTML('<button class="btn btn-primary" style="top:0;right:0;position:absolute;height:2.7em;" 
+            HTML('<button class="btn btn-primary" 
+                  style="top:0;right:0;position:absolute;height:2.7em;"
                   data-toggle="collapse" data-target="#collapse_controls">
-                  &#10010;</button>')
+                  &#10010;</button>'),
+            HTML('<button id="reset" class="btn btn-primary action-button" 
+                  style="top:0;right:3.2em;position:absolute;height:2.7em;"">
+                  clear</button>')
           )
         ),
         div(class = "panel-body", style="padding:0 15px 0 15px;",
@@ -80,7 +84,7 @@ shinyUI(navbarPage("Trashtracking",
             helpText("What are you searching for?"),
             uiOutput("locationTypeInput"),
             helpText("Distance in meters"),
-            sliderInput("distanceSlider", NULL, min = 100, max = 2500, value = 1000)
+            sliderInput("distanceSlider", NULL, min = 100, max = 2500, value = 200)
           )
         ),
         # Info footer

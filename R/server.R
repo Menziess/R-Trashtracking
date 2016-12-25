@@ -8,9 +8,16 @@
 
 source('externalAPI.R')
 
-# Data
-trash <- read.csv('../Data/output.csv') 
-trash <- filter(trash, latitude != 0 & latitude != 1 & longitude != 0 & longitude != 1)
+# Load data
+tryCatch({trash <- load("../Data/trash.RData")}, 
+         warning = function(w) {print(w)},
+         error = function(e) {print(e)},
+         finally = {
+           trash <- read.csv('../Data/output.csv')
+           trash <- filter(trash, latitude != 0 & latitude != 1 & longitude != 0 & longitude != 1)
+           save(trash, file = "../Data/trash.RData")
+         })
+
 
 # Shiny server
 shinyServer(function(input, output, session) {
@@ -88,7 +95,7 @@ shinyServer(function(input, output, session) {
                         "Universiteit" = "university",
                         "Warenhuis" = "department_store",
                         "Winkel" = "store")
-    selectInput("locationType", NULL, locationTypes, selected="Winkel")
+    selectInput("locationType", NULL, locationTypes)
   })
   
   #######################
@@ -191,7 +198,7 @@ shinyServer(function(input, output, session) {
   })
   
   # Shape click
-  observe({
+  observeEvent(input$map_shape_click, {
     click <- input$map_shape_click
     if(is.null(click))
       return()
@@ -199,7 +206,7 @@ shinyServer(function(input, output, session) {
   })
   
   # Barchart click
-  observe({
+  observeEvent(event_data("plotly_click"), {
     click <- event_data("plotly_click")
     if(is.null(click) || !is.data.frame(googleData))
       return()
@@ -234,6 +241,19 @@ shinyServer(function(input, output, session) {
   # Button Explore
   observeEvent(input$explore, {
     updateNavbarPage(session, "Trashtracking", "Map")
+  })
+  
+  # Reset actionbutton
+  observeEvent(input$reset, {
+    updateSliderInput(session, "distanceSlider", value=200)
+    updateDateRangeInput(session, "daterange", start = "2015-05-31", end = "2016-03-15")
+    updateSelectInput(session, "trashBrand", selected = "All")
+    updateSelectInput(session, "trashType", selected = "All")
+    updateSelectInput(session, "locationType", selected = "?")
+    map  %>% 
+      setView(5, 52, 7) %>%  
+      clearGroup('circles') %>%
+      clearGroup('placemarkers')
   })
   
   
