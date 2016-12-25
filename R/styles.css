@@ -57,8 +57,13 @@ html {
 
 /* Change cursor when over entire map */
 .leaflet-container {
-  cursor: pointer !important;
+  cursor: pointer;
 }
+
+/* Align container with help button */
+.leaflet-control-container {
+  transform: translateY(0.4em);
+} 
 
 /* Sidebar collapse animation */
 #collapse_sidebar {
