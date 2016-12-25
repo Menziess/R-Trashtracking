@@ -87,8 +87,8 @@ shinyServer(function(input, output, session) {
                         "Tankstation" = "gas_station",
                         "Universiteit" = "university",
                         "Warenhuis" = "department_store",
-                        "Winkel" = "Store")
-    selectInput("locationType", NULL, locationTypes)
+                        "Winkel" = "store")
+    selectInput("locationType", NULL, locationTypes, selected="Winkel")
   })
   
   #######################
@@ -187,7 +187,7 @@ shinyServer(function(input, output, session) {
     click <- input$map_marker_click
     if(is.null(click))
       return()
-    output$text <- renderText(paste("Marker at Lat:", round(click$lat, 2), "- Lng:", round(click$lng, 2)))
+    output$text <- renderText(paste("Marker at Lat:", round(click$lat, 4), "- Lng:", round(click$lng, 4)))
   })
   
   # Shape click
@@ -228,8 +228,6 @@ shinyServer(function(input, output, session) {
     if(input$lat == "" || input$lng == "")
       return()
     if((lat <- as.double(input$lat)) && (lng <- as.double(input$lng)))
-      # lat <- as.double(input$lat)
-      # lng <- as.double(input$lng)
       performMapSearch(lat, lng)
   })
   
@@ -248,7 +246,7 @@ shinyServer(function(input, output, session) {
     withProgress(message = "Getting Google Places", value = 0, {
       
       # Perform google radar search call
-      places <- radarSearch(lat, lng, input$distanceSlider, input$locationType)
+      places <- radarSearch(lat, lng, isolate(input$distanceSlider), input$locationType)
       nrResults <- length(places)
       
       if(nrResults == 0) {
@@ -260,7 +258,7 @@ shinyServer(function(input, output, session) {
         
         # Preperation as in filtering trash based on lat lng location with radius of distanceInLatLng
         incProgress(1/4, detail = "Filtering Trash")
-        distanceInLatLng <- metersToLatLng(lat, lng, input$distanceSlider)
+        distanceInLatLng <- metersToLatLng(lat, lng, isolate(input$distanceSlider))
         trash <- filter(isolate(filteredData()), latitude > lat - distanceInLatLng[[1]] & latitude < lat + distanceInLatLng[[1]]
                         & longitude > lng - distanceInLatLng[[2]] & longitude < lng + distanceInLatLng[[2]])
         
@@ -270,15 +268,12 @@ shinyServer(function(input, output, session) {
         googleData <<- retrievePlacesDetails(analyzation)
       } 
       
-      # Informative text
-      output$text <- renderText(paste0("Distance: ", input$distanceSlider, " meter. Locations found: ", nrResults, "."))
-      
       # Add distance circle on the map
       map %>% 
         setView(lng, lat, 14) %>%
         clearGroup('circles') %>%
         clearGroup('placemarkers') %>%
-        addCircles(lat = lat, lng = lng, radius = input$distanceSlider, group = "circles", fillOpacity = 0.05)
+        addCircles(lat = lat, lng = lng, radius = isolate(input$distanceSlider), group = "circles", fillOpacity = 0.05)
       
       # Retrieve detailed places information
       if (!is.null(googleData)) {

@@ -117,7 +117,7 @@ shinyUI(navbarPage("Trashtracking",
         ),
         conditionalPanel(
           condition="true",
-          div(class="form-inline", style="position:fixed;bottom:0.5em;background:white;display:inline;",
+          div(class="form-inline", style="position:fixed;bottom:0.5em;display:inline;",
             div(class="form-group",
               textInput("lat", NULL, NULL, 200, "lat")
             ),
