@@ -222,7 +222,7 @@ shinyServer(function(input, output, session) {
     })
     
     map %>% 
-      setView(googleData[click$z, 2], googleData[click$z, 3], 15)
+      setView(googleData[click$z, 2], googleData[click$z, 3], getViewport(isolate(input$distanceSlider)) + 1)
   })
   
   
@@ -292,14 +292,7 @@ shinyServer(function(input, output, session) {
       
       # Add distance circle on the map
       map %>% 
-        setView(lng, lat, 
-          ifelse(distance<125, 18,
-           ifelse(distance<250, 17,
-            ifelse(distance<500, 16,
-             ifelse(distance<1000, 15,
-              ifelse(distance<2000, 14, 13)))))
-          
-        ) %>%
+        setView(lng, lat, getViewport(distance)) %>%
         clearGroup('circles') %>%
         clearGroup('placemarkers') %>%
         addCircles(lat = lat, lng = lng, radius = distance, group = "circles", fillOpacity = 0.05)
@@ -386,5 +379,14 @@ shinyServer(function(input, output, session) {
       })
     })
   } 
+  
+  # Gets proper map viewport from distance input
+  getViewport <- function(distance) {
+    return(ifelse(distance<125, 18,
+    ifelse(distance<250, 17,
+    ifelse(distance<500, 16,
+    ifelse(distance<1000, 15,
+    ifelse(distance<2000, 14, 13))))))
+  }
 })
 
