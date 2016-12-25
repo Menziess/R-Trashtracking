@@ -27,7 +27,13 @@ googleKey = "AIzaSyBWD7q2E2YsJWmYbHjdr41jmMZntrUUtxs"
 radarSearch <- function(latitude = 0, longitude = 0, radius = 100, type = NULL, name = NULL, keyword = NULL) {
   if (is.null(type))
     stop('Missing required parameter "type"')
-  tryCatch(r <- GET("https://maps.googleapis.com/maps/api/place/radarsearch/json?", query = list(location=paste(latitude, longitude), radius=radius, type=type, name=name, keyword=keyword, key=googleKey)))
+  tryCatch({r <- GET("https://maps.googleapis.com/maps/api/place/radarsearch/json?", query = list(location=paste(latitude, longitude), radius=radius, type=type, name=name, keyword=keyword, key=googleKey))},
+           warning = function(W) {
+             print(w)
+           },
+           error = function(e) {
+             print(e)
+           })
   return (content(r, "parsed"))
 }
 

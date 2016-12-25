@@ -250,8 +250,8 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "trashBrand", selected = "All")
     updateSelectInput(session, "trashType", selected = "All")
     updateSelectInput(session, "locationType", selected = "?")
-    map  %>% 
-      setView(5, 52, 7) %>%  
+    map %>% 
+      setView(4.8999, 52.3724, 8) %>%  
       clearGroup('circles') %>%
       clearGroup('placemarkers')
   })
@@ -262,11 +262,13 @@ shinyServer(function(input, output, session) {
   ########################
   
   performMapSearch <- function(lat, lng) {
+
     # Add progress bar
     withProgress(message = "Getting Google Places", value = 0, {
       
       # Perform google radar search call
-      places <- radarSearch(lat, lng, isolate(input$distanceSlider), input$locationType)
+      distance  <- isolate(input$distanceSlider)
+      places <- radarSearch(lat, lng, distance, isolate(input$locationType))
       nrResults <- length(places)
       
       if(nrResults == 0) {
@@ -278,7 +280,7 @@ shinyServer(function(input, output, session) {
         
         # Preperation as in filtering trash based on lat lng location with radius of distanceInLatLng
         incProgress(1/4, detail = "Filtering Trash")
-        distanceInLatLng <- metersToLatLng(lat, lng, isolate(input$distanceSlider))
+        distanceInLatLng <- metersToLatLng(lat, lng, distance)
         trash <- filter(isolate(filteredData()), latitude > lat - distanceInLatLng[[1]] & latitude < lat + distanceInLatLng[[1]]
                         & longitude > lng - distanceInLatLng[[2]] & longitude < lng + distanceInLatLng[[2]])
         
@@ -290,10 +292,17 @@ shinyServer(function(input, output, session) {
       
       # Add distance circle on the map
       map %>% 
-        setView(lng, lat, 14) %>%
+        setView(lng, lat, 
+          ifelse(distance<125, 18,
+           ifelse(distance<250, 17,
+            ifelse(distance<500, 16,
+             ifelse(distance<1000, 15,
+              ifelse(distance<2000, 14, 13)))))
+          
+        ) %>%
         clearGroup('circles') %>%
         clearGroup('placemarkers') %>%
-        addCircles(lat = lat, lng = lng, radius = isolate(input$distanceSlider), group = "circles", fillOpacity = 0.05)
+        addCircles(lat = lat, lng = lng, radius = distance, group = "circles", fillOpacity = 0.05)
       
       # Retrieve detailed places information
       if (!is.null(googleData)) {
