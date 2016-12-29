@@ -284,6 +284,7 @@ shinyServer(function(input, output, session) {
       return()
     if((lat <- as.double(input$lat)) && (lng <- as.double(input$lng)))
       performMapSearch(lat, lng)
+    updateNavbarPage(session, "Trashtracking", "Map")
   })
   
   # Button Explore
