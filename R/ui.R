@@ -8,6 +8,7 @@ source('require.R')
 
 shinyUI(navbarPage("Trashtracking", 
   theme = shinytheme("flatly"),
+  useShinyjs(),
   selected = "Map",
   id = "Trashtracking",
   
@@ -88,19 +89,16 @@ shinyUI(navbarPage("Trashtracking",
         ),
         
         # Show overview of all data
-        conditionalPanel(
-          condition = "!output.plot",
-          div(class="text-center text-success",
-            h3("Overview of all trash")
-          ),
-          div(class="whitesmoked",
+        div(id="toggle-overview",
+          h3("Click near trash clusters", class="text-center text-success"),
+          div(
             plotlyOutput("overview")
           )
         ),
         
-        # When the map was clicked show analysis
-        conditionalPanel(
-          condition = "input.map_click",
+        # Show analysis
+        div(id="toggle-analysis", hidden = "hidden",
+          h3("Analysis", class="text-center text-success"),
           # div(
             # uiOutput("streetImage"),
             # htmlOutput("streetView")

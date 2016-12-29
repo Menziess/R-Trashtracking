@@ -40,11 +40,10 @@ shinyServer(function(input, output, session) {
       ) 
   })
   
-  
   ########################
   # Reactive Data Filter #
   ########################
-  
+
   # Reactive data filter
   filteredData <- reactive({
     if (!is.null(input$trashType) && input$trashType != 'All') {
@@ -209,8 +208,19 @@ shinyServer(function(input, output, session) {
       )
   })
   
-  # Map zoom
+  # Url parameters
   observe({
+    query <- parseQueryString(session$clientData$url_search)
+    if(is.null(query$lat) && is.null(query$lng))
+      return()
+    if(query$lat == "" || query$lng == "")
+      return()
+    if(is.double(lat <- as.double(query$lat)) && is.double(lng <- as.double(query$lng)))
+      performMapSearch(lat, lng, query$distance, query$type)
+  })
+  
+  # Map zoom
+  observeEvent(input$map_zoom, {
     e <- input$map_zoom
     if(is.null(e))
       return()
@@ -218,7 +228,7 @@ shinyServer(function(input, output, session) {
   })
   
   # Map click
-  observe({
+  observeEvent(input$map_click, {
     click <- input$map_click
     if(is.null(click))
       return()
@@ -226,7 +236,7 @@ shinyServer(function(input, output, session) {
   })
   
   # Marker click
-  observe({
+  observeEvent(input$map_marker_click, {
     click <- input$map_marker_click
     if(is.null(click))
       return()
@@ -239,6 +249,8 @@ shinyServer(function(input, output, session) {
     if(is.null(click))
       return()
     map %>% clearGroup('circles') %>% clearGroup('placemarkers')
+    shinyjs::hide("toggle-analysis")
+    shinyjs::show("toggle-overview")
   })
   
   # Barchart click
@@ -297,61 +309,70 @@ shinyServer(function(input, output, session) {
   #       Map Search     #
   ########################
   
-  performMapSearch <- function(lat, lng) {
+  performMapSearch <- function(lat, lng, distance = NULL, type = NULL) {
 
     # Add progress bar
     withProgress(message = "Getting Google Places", value = 0, {
+
+    # Perform google radar search call
+    if (!is.null(isolate(input$locationType)) || !is.null(type))
+      type <- ifelse(is.null(type), isolate(input$locationType), as.character(type))
+    if (!is.null(isolate(input$distanceSlider)) || !is.null(distance))
+      distance  <- ifelse(is.null(distance), isolate(input$distanceSlider), as.integer(distance))
+    places <- radarSearch(lat, lng, distance, type)
+    nrResults <- length(places)
+    
+    if(nrResults == 0) {
+      output$text <- renderText(paste("No places found in this area."))
+    } else {
       
-      # Perform google radar search call
-      distance  <- isolate(input$distanceSlider)
-      places <- radarSearch(lat, lng, distance, isolate(input$locationType))
-      nrResults <- length(places)
+      # Flatten places from list to dataframe
+      places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
       
-      if(nrResults == 0) {
-        output$text <- renderText(paste("No places found in this area."))
-      } else {
-        
-        # Flatten places from list to dataframe
-        places <- do.call(rbind, lapply(places$results, data.frame, stringsAsFactors=FALSE))
-        
-        # Preperation as in filtering trash based on lat lng location with radius of distanceInLatLng
-        incProgress(1/4, detail = "Filtering Trash")
-        distanceInLatLng <- metersToLatLng(lat, lng, distance)
-        trash <- filter(isolate(filteredData()), latitude > lat - distanceInLatLng[[1]] & latitude < lat + distanceInLatLng[[1]]
-                        & longitude > lng - distanceInLatLng[[2]] & longitude < lng + distanceInLatLng[[2]])
-        
-        # Analyzation joining, counting distinct trash and places
-        incProgress(2/4, detail = "Distance between Trash and Places")
-        analyzation <- analyse(trash, places)
-        googleData <<- retrievePlacesDetails(analyzation)
-      } 
+      # Preperation as in filtering trash based on lat lng location with radius of distanceInLatLng
+      incProgress(1/4, detail = "Filtering Trash")
+      distanceInLatLng <- metersToLatLng(lat, lng, distance)
+      trash <- filter(isolate(filteredData()), latitude > lat - distanceInLatLng[[1]] & latitude < lat + distanceInLatLng[[1]]
+                      & longitude > lng - distanceInLatLng[[2]] & longitude < lng + distanceInLatLng[[2]])
       
-      # Add distance circle on the map
-      map %>% 
-        setView(lng, lat, getViewport(distance)) %>%
-        clearGroup('circles') %>%
-        clearGroup('placemarkers') %>%
-        addCircles(lat = lat, lng = lng, radius = distance, group = "circles", fillOpacity = 0.05)
+      # Analyzation joining, counting distinct trash and places
+      incProgress(2/4, detail = "Distance between Trash and Places")
+      analyzation <- analyse(trash, places)
+      googleData <<- retrievePlacesDetails(analyzation)
+    } 
       
-      # Retrieve detailed places information
-      if (!is.null(googleData)) {
-        map %>%
-          addMarkers(
-            data = googleData,
-            group = 'placemarkers',
-            lng = ~Lng,
-            lat = ~Lat,
-            popup = paste0(
-              '<h3 display: inline-block><img src="', googleData$Icon, '" height=40, width=40" style="margin:0.5em 0.5em 0.5em 0em;" />', googleData$Name, '</h3>',
-              '<p><strong>Address:&nbsp </strong>', googleData$Address, '</p>',
-              '<p><strong>Phone:&nbsp </strong>', googleData$Phone, '</p>',
-              '<p><strong>Website:&nbsp </strong><a href="', googleData$Website, '" target="blank">', googleData$Website, '</a></p>'
-            ),
-            icon = makeIcon(
-              iconUrl = googleData$Icon,
-              iconWidth = 38, iconHeight = 40
-            )
+    # Add distance circle on the map
+    map %>% 
+      setView(lng, lat, getViewport(distance)) %>%
+      clearGroup('circles') %>%
+      clearGroup('placemarkers') %>%
+      addCircles(lat = lat, lng = lng, radius = distance, group = "circles", fillOpacity = 0.05)
+    
+    # Retrieve detailed places information
+    if (!is.null(googleData)) {
+      map %>%
+        addMarkers(
+          data = googleData,
+          group = 'placemarkers',
+          lng = ~Lng,
+          lat = ~Lat,
+          popup = paste0(
+            '<h3 display: inline-block><img src="', googleData$Icon, '" height=40, width=40" style="margin:0.5em 0.5em 0.5em 0em;" />', googleData$Name, '</h3>',
+            '<p><strong>Address:&nbsp </strong>', googleData$Address, '</p>',
+            '<p><strong>Phone:&nbsp </strong>', googleData$Phone, '</p>',
+            '<p><strong>Website:&nbsp </strong><a href="', googleData$Website, '" target="blank">', googleData$Website, '</a></p>'
+          ),
+          icon = makeIcon(
+            iconUrl = googleData$Icon,
+            iconWidth = 38, iconHeight = 40
           )
+        )
+      
+        shinyjs::hide("toggle-overview")
+        shinyjs::show("toggle-analysis")
+      } else {
+        shinyjs::show("toggle-overview")
+        shinyjs::hide("toggle-analysis")
       }
   
       # # Update Streetimage
@@ -363,7 +384,7 @@ shinyServer(function(input, output, session) {
       # output$streetView <- renderUI({
       #   tags$iframe(src=streetView(lat, lng), width=600, height=400, frameborder = 0, style = "border:0;")
       # })
-      
+    
       # Update Places Barchart
       incProgress(3/4, detail = "Render graphs")
       output$plot <- renderPlotly({
