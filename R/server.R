@@ -22,6 +22,7 @@ tryCatch({trash <- load("../Data/trash.RData")},
 # Shiny server
 shinyServer(function(input, output, session) {
   
+  
   ########################
   # Initial Leaflet Map  #
   ########################
@@ -38,6 +39,7 @@ shinyServer(function(input, output, session) {
         )
       ) 
   })
+  
   
   ########################
   # Reactive Data Filter #
@@ -58,6 +60,7 @@ shinyServer(function(input, output, session) {
     return (trash)
   })
 
+  
   #######################
   #       Inputs        #
   #######################
@@ -98,60 +101,93 @@ shinyServer(function(input, output, session) {
     selectInput("locationType", NULL, locationTypes)
   })
   
+  
   #######################
-  #       Outputs       #
+  #   Default outputs   #
   #######################
+  
+  # Plot overview
+  output$overview <- renderPlotly({
+    
+    df <- trash %>%
+      filter(grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand)) %>%
+      group_by(brand, type) %>%
+      summarise(n = n()) %>%
+      mutate(percentage = round(n / sum(n) * 100, 1))
 
-  output$overview <- renderPlot({ 
-    Mdata <- reactive({
-      tabletype = table(trash$brand, trash$type)
-      types = as.data.frame(tabletype)
-      names(types)[1] = 'brand'
-      names(types)[2] = 'type'
-      names(types)[3] = 'amount'
-      types <- types[order(-types$amount),]
-      types <- filter(types,grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand))
-      df = ddply(types, .(brand), transform, percent = round((amount/sum(amount) * 100),1))
-    })
     
-    output$M3 <- renderDataTable({
-      Mdata()
-    })
-    
-    ggplot(Mdata(), aes(x=reorder(brand,amount,function(x)+sum(x)), y=percent, fill=type))+
+    # plot_ly(df, r = ~percentage, t = ~type) %>% add_area(color = ~brand)
+
+    ggplotly(ggplot(df, aes(x=reorder(brand,n,function(x)+sum(x)), y=percentage, fill=type))+
       geom_bar(position = "fill", stat='identity',  width = .7)+
-      geom_text(aes(label=percent, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
+      geom_text(aes(label=percentage, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
       coord_flip() +
       scale_y_continuous(labels = percent_format())+
       ylab("")+
       xlab("")
-    })
+    ) %>%
+    config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE,
+           editable = FALSE, sendData = FALSE, displaylogo = FALSE
+    ) %>%
+    layout(width = 500, legend = list(x = 0.1, y = 0.9),
+           xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
+           yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
     
-    # Modal content
-    output$modal <- renderUI({
-      HTML(paste0(
-        '<div id="myModal" class="modal fade" style="top:1em;" role="dialog">',
-        '<div class="modal-dialog">',
-        '<div class="modal-content">',
-        '<div class="modal-header">',
-        '<button type="button" class="close" data-dismiss="modal">&times;</button>',
-        '<h4 class="modal-title">Hello there!</h4>',
-        '</div>',
-        '<div class="modal-body text-center">',
-        '<p>Start by clicking on a blank space on the map.</p>',
-        '<img src="instruction1.png" />',
-        '<p style="margin-top: 1em;">The system will locate interesting places that may a correlation with the trash in that area.</p>',
-        '<img src="instruction2.png" />',
-        '</div>',
-        '<div class="modal-footer">',
-        '<button type="button" class="btn btn-default" data-dismiss="modal">Got it</button>',
-        '</div>',
-        '</div>',
-        '</div>',
-        '</div>'
-      ))
-    })
+    # Mdata <- reactive({
+    #   tabletype = table(trash$brand, trash$type)
+    #   types = as.data.frame(tabletype)
+    #   names(types)[1] = 'brand'
+    #   names(types)[2] = 'type'
+    #   names(types)[3] = 'amount'
+    #   types <- types[order(-types$amount),]
+    #   types <- filter(types, grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand))
+    #   df = ddply(types, .(brand), transform, percent = round((amount/sum(amount) * 100),1))
+    # })
+    # 
+    # 
+    # ggplotly(ggplot(Mdata(), aes(x=reorder(brand,amount,function(x)+sum(x)), y=percent, fill=type))+
+    #   geom_bar(position = "fill", stat='identity',  width = .7)+
+    #   geom_text(aes(label=percent, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
+    #   coord_flip() +
+    #   scale_y_continuous(labels = percent_format())+
+    #   ylab("")+
+    #   xlab("")
+    # ) %>% 
+    # config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+    #        editable = FALSE, sendData = FALSE, displaylogo = FALSE
+    # ) %>%
+    # layout(width = 500, legend = list(x = 0.1, y = 0.9),
+    #        xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
+    #        yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
   
+  })
+  
+  # Modal content
+  output$modal <- renderUI({
+    HTML(paste0(
+      '<div id="myModal" class="modal fade" style="top:1em;" role="dialog">',
+      '<div class="modal-dialog">',
+      '<div class="modal-content">',
+      '<div class="modal-header">',
+      '<button type="button" class="close" data-dismiss="modal">&times;</button>',
+      '<h4 class="modal-title">Hello there!</h4>',
+      '</div>',
+      '<div class="modal-body text-center">',
+      '<p>Start by clicking on a blank space on the map.</p>',
+      '<img src="instruction1.png" />',
+      '<p style="margin-top: 1em;">The system will locate interesting places that may a correlation with the trash in that area.</p>',
+      '<img src="instruction2.png" />',
+      '</div>',
+      '<div class="modal-footer">',
+      '<button type="button" class="btn btn-default" data-dismiss="modal">Got it</button>',
+      '</div>',
+      '</div>',
+      '</div>',
+      '</div>'
+    ))
+  })
+  
+    
   #######################
   #      Observers      #
   #######################
@@ -332,12 +368,12 @@ shinyServer(function(input, output, session) {
                 hoverinfo = "text",
                 text = ~paste(Amount, "trash found at", Name)
         ) %>% 
-          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
-          ) %>%
-          layout(title = paste(sum(googleData$Amount), "trash near", nrow(googleData), "places."),
-                 xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
-                 yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+        config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+               editable = FALSE, sendData = FALSE, displaylogo = FALSE
+        ) %>%
+        layout(title = paste(sum(googleData$Amount), "trash near", nrow(googleData), "places."),
+               xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
+               yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Update Type Piechart
@@ -350,13 +386,13 @@ shinyServer(function(input, output, session) {
                 name = "Trash distribution",
                 type = "pie"
         ) %>% 
-          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
-          ) %>%
-          layout(title = 'Trash types within selected area',
-                 legend = list(x = 100, y = 0.5),
-                 xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+        config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+               editable = FALSE, sendData = FALSE, displaylogo = FALSE
+        ) %>%
+        layout(title = 'Trash types within selected area',
+               legend = list(x = 100, y = 0.5),
+               xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
       })
       
       # Update Brand Piechart
@@ -369,13 +405,13 @@ shinyServer(function(input, output, session) {
                 name = "Trash distribution",
                 type = "pie"
         ) %>% 
-          config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
-                 editable = FALSE, sendData = FALSE, displaylogo = FALSE
-          ) %>%
-          layout(title = 'Trash brands within selected area',
-                 legend = list(x = 100, y = 0.5),
-                 xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                 yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+        config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+               editable = FALSE, sendData = FALSE, displaylogo = FALSE
+        ) %>%
+        layout(title = 'Trash brands within selected area',
+               legend = list(x = 100, y = 0.5),
+               xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
       })
     })
   } 

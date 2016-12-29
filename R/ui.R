@@ -11,6 +11,7 @@ shinyUI(navbarPage("Trashtracking",
   selected = "Map",
   id = "Trashtracking",
   
+  
   ########################
   #   Links and Scripts  #
   ########################
@@ -20,22 +21,6 @@ shinyUI(navbarPage("Trashtracking",
     includeScript("script.js")
   ),
   
-  ########################
-  #       Overview      #
-  ########################
-  
-  tabPanel("Overview",
-    div(class="scatterplot",
-      column(12, align = "center",
-        h4("Thanks to the trash hunters we know.."),
-        helpText("To become a hunter download the Trash Hunters app for free, 
-                now available in the App and Playstore!"),
-        plotOutput("overview"),
-        helpText("This graph shows the all time top 10 brands that are found"),
-        actionButton("explore", "Explore", class = "btn-success btn-lg", style = "margin-top: 2em;")
-      )
-    )
-  ),
   
   ########################
   #         Map          #
@@ -101,12 +86,19 @@ shinyUI(navbarPage("Trashtracking",
           HTML('<button class="btn btn-primary" onClick="openSidebar()" style="height:2.7em;">
                &#10010;</button>')
         ),
+        
+        # Show overview of all data
         conditionalPanel(
           condition = "!output.plot",
-          div(class="text-center text-success", style="transform:translateY(4em);",
-            h3("Click on the map to proceed")
+          div(class="text-center text-success",
+            h3("Overview of all trash")
+          ),
+          div(class="whitesmoked",
+            plotlyOutput("overview")
           )
         ),
+        
+        # When the map was clicked show analysis
         conditionalPanel(
           condition = "input.map_click",
           div(
@@ -119,6 +111,8 @@ shinyUI(navbarPage("Trashtracking",
             plotlyOutput("pie_trash_brand")
           )
         ),
+        
+        # Dev input for latitude and longitude search 
         conditionalPanel(
           condition="true",
           div(class="form-inline", style="position:fixed;bottom:0.5em;display:inline;",
@@ -133,6 +127,22 @@ shinyUI(navbarPage("Trashtracking",
             )
           )
         )
+      )
+    )
+  ),
+  
+  
+  ########################
+  #       Overview      #
+  ########################
+  
+  tabPanel("About",
+    div(class="scatterplot",
+      column(12, align = "center",
+             h4("Thanks to the trashhunters we know."),
+             helpText("To become a hunter download the Trash Hunters app for free, 
+                       now available in the App and Playstore!"),
+             actionButton("explore", "Explore", class = "btn-success btn-lg", style = "margin-top: 2em;")
       )
     )
   )

@@ -55,3 +55,23 @@ trash$dates <- as.Date(trash$dates, "%d-%m-%y")
 
 
 test <- subset(trash, as.Date(trash$dates) >= as.Date("2012-07-22"))
+
+# Overview
+
+tabletype = table(trash$brand, trash$type)
+types = as.data.frame(tabletype)
+names(types)[1] = 'brand'
+names(types)[2] = 'type'
+names(types)[3] = 'amount'
+types <- types[order(-types$amount),]
+types <- filter(types, grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand))
+df = ddply(types, .(brand), transform, percent = round((amount/sum(amount) * 100),1))
+
+
+ggplot(Mdata(), aes(x=reorder(brand,amount,function(x)+sum(x)), y=percent, fill=type))+
+  geom_bar(position = "fill", stat='identity',  width = .7)+
+  geom_text(aes(label=percent, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
+  coord_flip() +
+  scale_y_continuous(labels = percent_format())+
+  ylab("")+
+  xlab("")
