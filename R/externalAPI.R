@@ -37,6 +37,18 @@ radarSearch <- function(latitude = 0, longitude = 0, radius = 100, type = NULL, 
   return (content(r, "parsed"))
 }
 
+# Get static image url from google streetview
+streetImage <- function(latitude = 0, longitude = 0, size = "600x400") {
+  request <- paste0("https://maps.googleapis.com/maps/api/streetview?size=", size, "&location=", latitude, ",", longitude, "&key=", googleKey)
+  return (request)
+}
+
+# Getting interactive streetview url from google streetview
+streetView <- function(latitude= 0, longitude = 0, heading = 210, pitch = 10, fov = 35) {
+  request <- paste0("https://www.google.com/maps/embed/v1/streetview?location=", latitude, ",", longitude, "&heading=", heading, "&pitch=", pitch, "&fov=", fov, "&key=", googleKey)
+  return (request)
+}
+ 
 #The Google Places API Location Search Service allows you to search for a location and get all the details from Google.
 locationSearch <- function(placeid) {
   if (is.null(placeid))

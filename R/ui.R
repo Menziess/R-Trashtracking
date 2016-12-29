@@ -101,6 +101,10 @@ shinyUI(navbarPage("Trashtracking",
         # When the map was clicked show analysis
         conditionalPanel(
           condition = "input.map_click",
+          # div(
+            # uiOutput("streetImage"),
+            # htmlOutput("streetView")
+          # ),
           div(
             plotlyOutput("plot")
           ),

@@ -353,6 +353,16 @@ shinyServer(function(input, output, session) {
             )
           )
       }
+  
+      # # Update Streetimage
+      # output$streetImage <- renderUI({
+      #   tags$img(src= streetImage(lat, lng))
+      # })
+      
+      # Update Streetview
+      # output$streetView <- renderUI({
+      #   tags$iframe(src=streetView(lat, lng), width=600, height=400, frameborder = 0, style = "border:0;")
+      # })
       
       # Update Places Barchart
       incProgress(3/4, detail = "Render graphs")
