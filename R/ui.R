@@ -81,6 +81,9 @@ shinyUI(
             h3("Click near trash clusters", class="text-center text-success"),
             div(
               plotlyOutput("overview")
+            ),
+            div(
+              plotOutput("datePlot")
             )
           ),
           

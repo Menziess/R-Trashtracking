@@ -159,7 +159,27 @@ shinyServer(function(input, output, session) {
     # layout(width = 500, legend = list(x = 0.1, y = 0.9),
     #        xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
     #        yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+  })
   
+  tabledate = table(trash$dates)
+  dateinfo = as.data.frame(tabledate)
+  names(dateinfo)[1] = 'date'
+  names(dateinfo)[2] = 'amount'
+  
+  dateinformation <- setDT(dateinfo)[, date := as.IDate(date)][, .(mn_amt = round(mean(amount))), by = .(yr = year(date), mon = month(date))]
+  dateinformation <- transform(dateinformation, month = month.abb[mon])
+  dateinformation <- dateinformation[,c(3,4)]
+  dateinformation <- dateinformation[2:11,]
+  
+  output$datePlot <- renderPlot({
+    
+  barplot(height=dateinformation$mn_amt,names.arg=dateinformation$month,
+            col = 'navajowhite', border = 'navajowhite3',    
+            main= paste("Trash by month"),
+            ylab="Number of trash produced",
+            xlab="months",
+            ylim = c(0,50)
+    )
   })
   
   # Modal content
