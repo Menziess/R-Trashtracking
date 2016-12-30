@@ -117,7 +117,8 @@ shinyServer(function(input, output, session) {
     
     # plot_ly(df, r = ~percentage, t = ~type) %>% add_area(color = ~brand)
 
-    ggplotly(ggplot(df, aes(x=reorder(brand,n,function(x)+sum(x)), y=percentage, fill=type))+
+    type_colors <- colorRampPalette(brewer.pal(4,"Reds"))(10)
+    ggplotly(ggplot(df, aes(x=reorder(brand,n,function(x)+sum(x)), y=percentage, fill=type, color = type_colors))+
       geom_bar(position = "fill", stat='identity',  width = .7)+
       geom_text(aes(label=percentage, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
       coord_flip() +
@@ -412,9 +413,12 @@ shinyServer(function(input, output, session) {
       output$pie_trash_type <- renderPlotly({
         if(!is.data.frame(googleData))
           return()
+        type_colors <- colorRampPalette(brewer.pal(4,"Reds"))(10)
         plot_ly(head(trash %>% count(type, sort = T), 10),
                 labels = ~type,
                 values = ~n,
+                marker = list(colors = type_colors,
+                              line = list(color = '#FFFFFF', width = 1)),
                 name = "Trash distribution",
                 type = "pie"
         ) %>% 
@@ -431,9 +435,12 @@ shinyServer(function(input, output, session) {
       output$pie_trash_brand <- renderPlotly({
         if(!is.data.frame(googleData)) 
           return ()
+        brand_colors <- colorRampPalette(brewer.pal(9, "Purples"))(10)
         plot_ly(head(trash %>% count(brand, sort = T), 10),
                 labels = ~brand,
                 values = ~n,
+                marker = list(colors = brand_colors,
+                              line = list(color = '#FFFFFF', width = 1)), 
                 name = "Trash distribution",
                 type = "pie"
         ) %>% 
