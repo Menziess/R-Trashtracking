@@ -80,7 +80,7 @@ shinyUI(
           div(id="toggle-overview",
             h3("Click near trash clusters", class="text-center text-success"),
             div(
-              plotlyOutput("overview")
+              plotOutput("overview")
             ),
             div(
               plotOutput("datePlot")

@@ -106,32 +106,48 @@ shinyServer(function(input, output, session) {
   #######################
   
   # Plot overview
-  output$overview <- renderPlotly({
+  output$overview <- renderPlot({
     
-    df <- trash %>%
-      filter(grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand)) %>%
-      group_by(brand, type) %>%
-      summarise(n = n()) %>%
-      mutate(percentage = round(n / sum(n) * 100, 1))
-
+    tabletype = table(trash$brand, trash$type)
+    types = as.data.frame(tabletype)
+    names(types)[1] = 'brand'
+    names(types)[2] = 'type'
+    names(types)[3] = 'amount'
+    types <- types[order(-types$amount),]
+    types <- filter(types, grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers', brand))
     
-    # plot_ly(df, r = ~percentage, t = ~type) %>% add_area(color = ~brand)
-
-    type_colors <- colorRampPalette(brewer.pal(4,"Reds"))(10)
-    ggplotly(ggplot(df, aes(x=reorder(brand,n,function(x)+sum(x)), y=percentage, fill=type, color = type_colors))+
-      geom_bar(position = "fill", stat='identity',  width = .7)+
-      geom_text(aes(label=percentage, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
-      coord_flip() +
-      scale_y_continuous(labels = percent_format())+
-      ylab("")+
-      xlab("")
-    ) %>%
-    config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE,
-           editable = FALSE, sendData = FALSE, displaylogo = FALSE
-    ) %>%
-    layout(width = 500, legend = list(x = 0.1, y = 0.9),
-           xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
-           yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+    ggplot(types, aes(x = brand)) + 
+      geom_bar(aes(weight=amount, fill = type), position = 'fill') + 
+      scale_y_continuous("", breaks=NULL) + 
+      scale_fill_manual(values = rev(colorRampPalette(brewer.pal(4,"Reds"))(10))) + 
+      coord_polar()
+    
+  })
+    
+    # df <- trash %>%
+    #   filter(grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand)) %>%
+    #   group_by(brand, type) %>%
+    #   summarise(n = n()) %>%
+    #   mutate(percentage = round(n / sum(n) * 100, 1))
+    # 
+    # 
+    # # plot_ly(df, r = ~percentage, t = ~type) %>% add_area(color = ~brand)
+    # 
+    # type_colors <- colorRampPalette(brewer.pal(4,"Reds"))(10)
+    # ggplotly(ggplot(df, aes(x=reorder(brand,n,function(x)+sum(x)), y=percentage, fill=type, color = type_colors))+
+    #   geom_bar(position = "fill", stat='identity',  width = .7)+
+    #   geom_text(aes(label=percentage, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
+    #   coord_flip() +
+    #   scale_y_continuous(labels = percent_format())+
+    #   ylab("")+
+    #   xlab("")
+    # ) %>%
+    # config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE,
+    #        editable = FALSE, sendData = FALSE, displaylogo = FALSE
+    # ) %>%
+    # layout(width = 500, legend = list(x = 0.1, y = 0.9),
+    #        xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
+    #        yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
     
     # Mdata <- reactive({
     #   tabletype = table(trash$brand, trash$type)
@@ -159,7 +175,7 @@ shinyServer(function(input, output, session) {
     # layout(width = 500, legend = list(x = 0.1, y = 0.9),
     #        xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
     #        yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-  })
+  
   
   tabledate = table(trash$dates)
   dateinfo = as.data.frame(tabledate)
@@ -174,7 +190,7 @@ shinyServer(function(input, output, session) {
   output$datePlot <- renderPlot({
     
   barplot(height=dateinformation$mn_amt,names.arg=dateinformation$month,
-            col = 'navajowhite', border = 'navajowhite3',    
+            col = 'pink2', border = 'navajowhite3',    
             main= paste("Trash by month"),
             ylab="Number of trash produced",
             xlab="months",
