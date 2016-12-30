@@ -108,57 +108,59 @@ shinyServer(function(input, output, session) {
   # Plot overview
   output$overview <- renderPlotly({
     
-    df <- trash %>%
-      filter(grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand)) %>%
-      group_by(brand, type) %>%
-      summarise(n = n()) %>%
-      mutate(percentage = round(n / sum(n) * 100, 1))
-
+    Mdata <- reactive({
+      tabletype = table(trash$brand, trash$type)
+      types = as.data.frame(tabletype)
+      names(types)[1] = 'brand'
+      names(types)[2] = 'type'
+      names(types)[3] = 'amount'
+      types <- types[order(-types$amount),]
+      types <- filter(types, grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand))
+      df = ddply(types, .(brand), transform, percent = round((amount/sum(amount) * 100),1))
+    })
     
-    # plot_ly(df, r = ~percentage, t = ~type) %>% add_area(color = ~brand)
-
-    type_colors <- colorRampPalette(brewer.pal(4,"Reds"))(10)
-    ggplotly(ggplot(df, aes(x=reorder(brand,n,function(x)+sum(x)), y=percentage, fill=type, color = type_colors))+
+    colors <- colorRampPalette(brewer.pal(4,"Reds"))(10)
+    ggplot(Mdata(), aes(x=reorder(brand,amount,function(x)+sum(x)), y=percent, fill=type))+
       geom_bar(position = "fill", stat='identity',  width = .7)+
-      geom_text(aes(label=percentage, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
+      geom_text(aes(label=percent, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
       coord_flip() +
       scale_y_continuous(labels = percent_format())+
       ylab("")+
       xlab("")
-    ) %>%
-    config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE,
-           editable = FALSE, sendData = FALSE, displaylogo = FALSE
-    ) %>%
-    layout(width = 500, legend = list(x = 0.1, y = 0.9),
-           xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
-           yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
     
-    # Mdata <- reactive({
-    #   tabletype = table(trash$brand, trash$type)
-    #   types = as.data.frame(tabletype)
-    #   names(types)[1] = 'brand'
-    #   names(types)[2] = 'type'
-    #   names(types)[3] = 'amount'
-    #   types <- types[order(-types$amount),]
-    #   types <- filter(types, grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand))
-    #   df = ddply(types, .(brand), transform, percent = round((amount/sum(amount) * 100),1))
-    # })
+    #######################
+    #    Dezelfde data    #
+    #######################
+    
+    # df <- trash %>%
+    #   filter(grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand)) %>%
+    #   group_by(brand, type) %>%
+    #   summarise(n = n()) %>%
+    #   mutate(percentage = round(n / sum(n) * 100, 1))
     # 
     # 
-    # ggplotly(ggplot(Mdata(), aes(x=reorder(brand,amount,function(x)+sum(x)), y=percent, fill=type))+
+    # plot_ly(df, r = ~percentage, t = ~type) %>% add_area(color = ~brand)
+    
+    
+    #######################
+    #  ggplot2 in plotly  #
+    #######################
+    
+    # ggplotly(ggplot(df, aes(x=reorder(brand,n,function(x)+sum(x)), y=percentage, fill=type))+
     #   geom_bar(position = "fill", stat='identity',  width = .7)+
-    #   geom_text(aes(label=percent, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
+    #   geom_text(aes(label=percentage, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
     #   coord_flip() +
     #   scale_y_continuous(labels = percent_format())+
     #   ylab("")+
     #   xlab("")
-    # ) %>% 
-    # config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE, 
+    # ) %>%
+    # config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE,
     #        editable = FALSE, sendData = FALSE, displaylogo = FALSE
     # ) %>%
     # layout(width = 500, legend = list(x = 0.1, y = 0.9),
     #        xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
     #        yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
   })
   
   tabledate = table(trash$dates)
@@ -173,7 +175,7 @@ shinyServer(function(input, output, session) {
   
   output$datePlot <- renderPlot({
     
-  barplot(height=dateinformation$mn_amt,names.arg=dateinformation$month,
+    barplot(height=dateinformation$mn_amt,names.arg=dateinformation$month,
             col = 'navajowhite', border = 'navajowhite3',    
             main= paste("Trash by month"),
             ylab="Number of trash produced",
@@ -412,11 +414,13 @@ shinyServer(function(input, output, session) {
       output$plot <- renderPlotly({
         if(!is.data.frame(googleData))
           return()
+        colors <- colorRampPalette(brewer.pal(4,"Greens"))(10)
         plot_ly(googleData,
                 x = ~Name,
                 y = ~Amount,
                 z = ~Place,
                 name = "Top 10 trash found at google places",
+                colors = colors,
                 type = "bar",
                 hoverinfo = "text",
                 text = ~paste(Amount, "trash found at", Name)
@@ -433,12 +437,11 @@ shinyServer(function(input, output, session) {
       output$pie_trash_type <- renderPlotly({
         if(!is.data.frame(googleData))
           return()
-        type_colors <- colorRampPalette(brewer.pal(4,"Reds"))(10)
+        colors <- colorRampPalette(brewer.pal(4,"Reds"))(10)
         plot_ly(head(trash %>% count(type, sort = T), 10),
                 labels = ~type,
                 values = ~n,
-                marker = list(colors = type_colors,
-                              line = list(color = '#FFFFFF', width = 1)),
+                marker = list(colors = colors, line = list(color = '#FFFFFF', width = 1)),
                 name = "Trash distribution",
                 type = "pie"
         ) %>% 
@@ -455,12 +458,11 @@ shinyServer(function(input, output, session) {
       output$pie_trash_brand <- renderPlotly({
         if(!is.data.frame(googleData)) 
           return ()
-        brand_colors <- colorRampPalette(brewer.pal(9, "Purples"))(10)
+        colors <- colorRampPalette(brewer.pal(9, "Purples"))(10)
         plot_ly(head(trash %>% count(brand, sort = T), 10),
                 labels = ~brand,
                 values = ~n,
-                marker = list(colors = brand_colors,
-                              line = list(color = '#FFFFFF', width = 1)), 
+                marker = list(colors = colors, line = list(color = '#FFFFFF', width = 1)), 
                 name = "Trash distribution",
                 type = "pie"
         ) %>% 
