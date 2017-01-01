@@ -330,6 +330,18 @@ shinyServer(function(input, output, session) {
       ))
     })
     
+    map %>% addTiles() %>%
+      addPopups(
+        googleData[click$z, 2], googleData[click$z, 3], paste0(
+          '<hr/>',
+          '<h3 display: inline-block><img src="', googleData[click$z, 4], '" height=40, width=40" />', googleData[click$z, 1], '</h3>',
+          '<p><strong>Address:&nbsp </strong>', googleData[click$z, 5], '</p>',
+          '<p><strong>Phone:&nbsp </strong>', googleData[click$z, 6], '</p>',
+          '<p><strong>Website:&nbsp </strong><a href="', googleData[click$z, 7], '" target="blank">', googleData[click$z, 7], '</a></p>',
+          '<hr/>'
+        ) 
+      )
+    
     map %>% 
       setView(googleData[click$z, 2], googleData[click$z, 3], getViewport(isolate(input$distanceSlider)) + 1)
   })
