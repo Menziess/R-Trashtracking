@@ -105,23 +105,20 @@ shinyServer(function(input, output, session) {
   #   Default outputs   #
   #######################
   
+  
   # Plot overview
   output$overview <- renderPlot({
-      
-    tabletype = table(trash$brand, trash$type)
-    types = as.data.frame(tabletype)
-    names(types)[1] = 'brand'
-    names(types)[2] = 'type'
-    names(types)[3] = 'amount'
-    types <- types[order(-types$amount),]
-    types <- filter(types, grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers', brand))
+    df <- trash %>%
+      filter(grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand)) %>%
+      group_by(brand, type) %>%
+      summarise(n = n()) %>%
+      mutate(percentage = round(n / sum(n) * 100, 1))
     
-    ggplot(types, aes(x = brand)) + 
-      geom_bar(aes(weight=amount, fill = type), position = 'fill') + 
+    ggplot(df, aes(x = brand)) + 
+      geom_bar(aes(weight=n, fill = type), position = 'fill') + 
       scale_y_continuous("", breaks=NULL) + 
       scale_fill_manual(values = rev(colorRampPalette(brewer.pal(4,"Reds"))(10))) + 
       coord_polar()
-    
   })
   
   # Plot trash by month
