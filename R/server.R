@@ -319,6 +319,7 @@ shinyServer(function(input, output, session) {
     click <- event_data("plotly_click")
     if(is.null(click) || !is.data.frame(googleData))
       return()
+    map %>% clearPopups()
     output$details <- renderUI({
       HTML(paste0(
         '<hr/>',
