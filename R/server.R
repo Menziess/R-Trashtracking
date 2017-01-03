@@ -116,12 +116,13 @@ shinyServer(function(input, output, session) {
     ggplot(df, aes(x = brand)) + 
       geom_bar(aes(weight=n, fill = type), position = 'fill') + 
       scale_y_continuous("", breaks=NULL) + 
-      scale_fill_manual(values = rev(colorRampPalette(brewer.pal(4,"Reds"))(10))) + 
+      scale_fill_manual(values = rev(colorRampPalette(brewer.pal(8,"Set3"))(10))) + 
       coord_polar()
   })
   
   # Plot trash by month
   output$datePlot <- renderPlot({
+  
     tabledate = table(trash$dates)
     dateinfo = as.data.frame(tabledate)
     names(dateinfo)[1] = 'date'
@@ -402,7 +403,7 @@ shinyServer(function(input, output, session) {
       output$pie_trash_type <- renderPlotly({
         if(!is.data.frame(googleData))
           return()
-        colors <- colorRampPalette(brewer.pal(4,"Reds"))(10)
+        colors <- colorRampPalette(brewer.pal(9,"Pastel1"))(10)
         plot_ly(head(trash %>% count(type, sort = T), 10),
                 labels = ~type,
                 values = ~n,
@@ -423,7 +424,7 @@ shinyServer(function(input, output, session) {
       output$pie_trash_brand <- renderPlotly({
         if(!is.data.frame(googleData)) 
           return ()
-        colors <- colorRampPalette(brewer.pal(9, "Purples"))(10)
+        colors <- colorRampPalette(brewer.pal(-9, "RdYlBu"))(10)
         plot_ly(head(trash %>% count(brand, sort = T), 10),
                 labels = ~brand,
                 values = ~n,
