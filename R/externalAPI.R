@@ -63,7 +63,8 @@ analyse <- function(trash, places) {
   matrix <- distm(
     trash[,c('longitude','latitude')], 
     places[,c('geometry.location.lng','geometry.location.lat')], 
-    fun=distVincentyEllipsoid
+    # See ftp://cran.r-project.org/pub/R/web/packages/geosphere/geosphere.pdf for more methods
+    fun=distCosine
   )
 
   trash$place_id <- places$place_id[apply(matrix, 1, which.min)]  
