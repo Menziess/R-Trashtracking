@@ -115,43 +115,41 @@ shinyUI(
     
     navbarMenu("More",
       tabPanel("About",
-        h3("About", class="text-center text-success"),
-        column(12, align = "center",
-          h4("Thanks to the trashhunters we know."),
-          helpText("To become a hunter download the Trash Hunters app for free, 
-                  now available in the App and Playstore!"),
-          HTML('<a href="http://www.plasticsoupfoundation.org/"
-              target="blank"
-              class="btn btn-success btn-lg" 
-              style="margin:2em;">
-              Hunt!</a>')
+        fluidRow(
+          h3("About", class="text-center text-success"),
+          column(12, align = "center",
+            h4("Thanks to the trashhunters we know."),
+            helpText("To become a hunter download the Trash Hunters app for free, 
+                    now available in the App and Playstore!"),
+            HTML('<a href="http://www.plasticsoupfoundation.org/"
+                target="blank"
+                class="btn btn-success btn-lg" 
+                style="margin:2em;">
+                Hunt!</a>'),
+            h4("This app was brought to you by")
+          )
         ),
-        column(12, align = "center",
-          h4("This app was brought to you by")
-        ),
-        column(6, align = "right",
-          HTML('<a href="https://github.com/Menziess"target="blank">
-               <span class="help-block">
-               Stefan Schenk
-               </span>
-               </a>'),
-          HTML('<a href="https://github.com/11bowman"target="blank">
-               <span class="help-block">
-               Jeffrey Peeters
-               </span>
-               </a>')
-        ),
-        column(6, align = "left",
-          HTML('<a href="https://github.com/somayedkh"target="blank">
-               <span class="help-block">
-               Somaye Dadkhodaie
-               </span>
-               </a>'),
-          HTML('<a href="https://github.com/ZRAbbas" target="blank">
-               <span class="help-block">
-               Zehra Abbas
-               </span>
-               </a>')
+        div(style="margin: 1em auto 1em auto;width:70%;",
+          column(6, align="center",
+            HTML(
+             '<a href="https://github.com/Menziess" target="blank"><span class="help-block">
+                Stefan Schenk
+              </span></a>
+              <a href="https://github.com/11bowman" target="blank"><span class="help-block">
+                Jeffrey Peeters
+              </span></a>'
+            )
+          ),
+          column(6, align="center",
+            HTML(
+             '<a href="https://github.com/somayedkh" target="blank"><span class="help-block">
+                Somaye Dadkhodaie
+              </span></a>
+              <a href="https://github.com/ZRAbbas" target="blank"><span class="help-block">
+                Zehra Abbas
+              </span></a>'
+            )
+          )
         ),
         column(12, align = "center",
           HTML('<a href="https://github.com/Menziess/Trashtracking"

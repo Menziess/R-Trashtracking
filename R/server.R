@@ -264,6 +264,11 @@ shinyServer(function(input, output, session) {
     })
   })
   
+  # If mobile detected, change tab
+  observeEvent(input$mobile, {
+    updateTabsetPanel(session, "Trashtracking", "About")
+  })
+  
   
   ########################
   #       Buttons        #

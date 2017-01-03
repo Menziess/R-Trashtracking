@@ -10,9 +10,13 @@ $(document).ready(function(){
           $('#myModal').modal('show');
           localStorage.setItem("help", true);
         }
+        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+          Shiny.onInputChange("mobile", T);
+        }
       }
     }, 3000);
   });
+  
 });
 
 
