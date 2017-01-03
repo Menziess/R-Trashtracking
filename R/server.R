@@ -287,7 +287,10 @@ shinyServer(function(input, output, session) {
     map %>% 
       setView(4.8999, 52.3724, 8) %>%  
       clearGroup('circles') %>%
-      clearGroup('placemarkers')
+      clearGroup('placemarkers') %>% 
+      clearPopups()
+    shinyjs::hide("toggle-analysis")
+    shinyjs::show("toggle-overview")
   })
   
   
