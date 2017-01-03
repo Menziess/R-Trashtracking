@@ -105,7 +105,6 @@ shinyServer(function(input, output, session) {
   #   Default outputs   #
   #######################
   
-  
   # Plot overview
   output$overview <- renderPlot({
     df <- trash %>%
@@ -275,11 +274,6 @@ shinyServer(function(input, output, session) {
       return()
     if((lat <- as.double(input$lat)) && (lng <- as.double(input$lng)))
       performMapSearch(lat, lng)
-    updateNavbarPage(session, "Trashtracking", "Map")
-  })
-  
-  # Button Explore
-  observeEvent(input$explore, {
     updateNavbarPage(session, "Trashtracking", "Map")
   })
   

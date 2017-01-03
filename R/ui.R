@@ -115,16 +115,56 @@ shinyUI(
     
     navbarMenu("More",
       tabPanel("About",
+        h3("About", class="text-center text-success"),
         column(12, align = "center",
-               h4("Thanks to the trashhunters we know."),
-               helpText("To become a hunter download the Trash Hunters app for free, 
-                        now available in the App and Playstore!"),
-               actionButton("explore", "Explore", class = "btn-success btn-lg", style = "margin-top: 2em;")
+          h4("Thanks to the trashhunters we know."),
+          helpText("To become a hunter download the Trash Hunters app for free, 
+                  now available in the App and Playstore!"),
+          HTML('<a href="http://www.plasticsoupfoundation.org/"
+              target="blank"
+              class="btn btn-success btn-lg" 
+              style="margin:2em;">
+              Hunt!</a>')
+        ),
+        column(12, align = "center",
+          h4("This app was brought to you by")
+        ),
+        column(6, align = "right",
+          HTML('<a href="https://github.com/Menziess"target="blank">
+               <span class="help-block">
+               Stefan Schenk
+               </span>
+               </a>'),
+          HTML('<a href="https://github.com/11bowman"target="blank">
+               <span class="help-block">
+               Jeffrey Peeters
+               </span>
+               </a>')
+        ),
+        column(6, align = "left",
+          HTML('<a href="https://github.com/somayedkh"target="blank">
+               <span class="help-block">
+               Somaye Dadkhodaie
+               </span>
+               </a>'),
+          HTML('<a href="https://github.com/ZRAbbas" target="blank">
+               <span class="help-block">
+               Zehra Abbas
+               </span>
+               </a>')
+        ),
+        column(12, align = "center",
+          HTML('<a href="https://github.com/Menziess/Trashtracking"
+                target="blank"
+                class="btn btn-default btn-lg" 
+                style="margin:2em;">
+                Contribute</a>')
         )
       ),
       "----",
       tabPanel("Search", align = "center",
         h3("Search", class="text-center text-success"),
+        helpText("Enter a latitude and longitude to perform a map search"),
         div(class="form-inline",
           div(class="form-group",
             textInput("lat", NULL, NULL, 200, "lat")
