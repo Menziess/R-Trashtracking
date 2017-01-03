@@ -107,114 +107,37 @@ shinyServer(function(input, output, session) {
   
   # Plot overview
   output$overview <- renderPlot({
-
-    tabletype = table(trash$brand, trash$type)
-    types = as.data.frame(tabletype)
-    names(types)[1] = 'brand'
-    names(types)[2] = 'type'
-    names(types)[3] = 'amount'
-    types <- types[order(-types$amount),]
-    types <- filter(types, grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers', brand))
+    df <- trash %>%
+      filter(grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand)) %>%
+      group_by(brand, type) %>%
+      summarise(n = n()) %>%
+      mutate(percentage = round(n / sum(n) * 100, 1))
     
-    ggplot(types, aes(x = brand)) + 
-      geom_bar(aes(weight=amount, fill = type), position = 'fill') + 
+    ggplot(df, aes(x = brand)) + 
+      geom_bar(aes(weight=n, fill = type), position = 'fill') + 
       scale_y_continuous("", breaks=NULL) + 
-      scale_fill_manual(values = rev(colorRampPalette(brewer.pal(8,"Set3"))(10))) + 
+      scale_fill_manual(values = rev(colorRampPalette(brewer.pal(4,"Reds"))(10))) + 
       coord_polar()
-    
   })
-    
-    # df <- trash %>%
-    #   filter(grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand)) %>%
-    #   group_by(brand, type) %>%
-    #   summarise(n = n()) %>%
-    #   mutate(percentage = round(n / sum(n) * 100, 1))
-    # 
-    # 
-    # # plot_ly(df, r = ~percentage, t = ~type) %>% add_area(color = ~brand)
-    # 
-    # type_colors <- colorRampPalette(brewer.pal(4,"Reds"))(10)
-    # ggplotly(ggplot(df, aes(x=reorder(brand,n,function(x)+sum(x)), y=percentage, fill=type, color = type_colors))+
-    #   geom_bar(position = "fill", stat='identity',  width = .7)+
-    #   geom_text(aes(label=percentage, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
-    #   coord_flip() +
-    #   scale_y_continuous(labels = percent_format())+
-    #   ylab("")+
-    #   xlab("")
-    # ) %>%
-    # config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE,
-    #        editable = FALSE, sendData = FALSE, displaylogo = FALSE
-    # ) %>%
-    # layout(width = 500, legend = list(x = 0.1, y = 0.9),
-    #        xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
-    #        yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-
-    # Mdata <- reactive({
-    #   tabletype = table(trash$brand, trash$type)
-    #   types = as.data.frame(tabletype)
-    #   names(types)[1] = 'brand'
-    #   names(types)[2] = 'type'
-    #   names(types)[3] = 'amount'
-    #   types <- types[order(-types$amount),]
-    #   types <- filter(types, grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand))
-    #   df = ddply(types, .(brand), transform, percent = round((amount/sum(amount) * 100),1))
-    # })
-    # 
-    # colors <- colorRampPalette(brewer.pal(4,"Reds"))(10)
-    # ggplot(Mdata(), aes(x=reorder(brand,amount,function(x)+sum(x)), y=percent, fill=type))+
-    #   geom_bar(position = "fill", stat='identity',  width = .7)+
-    #   geom_text(aes(label=percent, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
-    #   coord_flip() +
-    #   scale_y_continuous(labels = percent_format())+
-    #   ylab("")+
-    #   xlab("")
-    
-    #######################
-    #    Dezelfde data    #
-    #######################
-    
-    # df <- trash %>%
-    #   filter(grepl('Red Bull|Heineken|Coca Cola|AH|AA|Spa|Amstel|Slammers',brand)) %>%
-    #   group_by(brand, type) %>%
-    #   summarise(n = n()) %>%
-    #   mutate(percentage = round(n / sum(n) * 100, 1))
-    # 
-    # 
-    # plot_ly(df, r = ~percentage, t = ~type) %>% add_area(color = ~brand)
-    
-    
-    #######################
-    #  ggplot2 in plotly  #
-    #######################
-    
-    # ggplotly(ggplot(df, aes(x=reorder(brand,n,function(x)+sum(x)), y=percentage, fill=type))+
-    #   geom_bar(position = "fill", stat='identity',  width = .7)+
-    #   geom_text(aes(label=percentage, ymax=100, ymin=0), vjust=0, hjust=2, color = "white",  position=position_fill())+
-    #   coord_flip() +
-    #   scale_y_continuous(labels = percent_format())+
-    #   ylab("")+
-    #   xlab("")
-    # ) %>%
-    # config(p = ., staticPlot = FALSE, displayModeBar = FALSE, workspace = FALSE,
-    #        editable = FALSE, sendData = FALSE, displaylogo = FALSE
-    # ) %>%
-    # layout(width = 500, legend = list(x = 0.1, y = 0.9),
-    #        xaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = TRUE),
-    #        yaxis = list(title = "", showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
   
-  tabledate = table(trash$dates)
-  dateinfo = as.data.frame(tabledate)
-  names(dateinfo)[1] = 'date'
-  names(dateinfo)[2] = 'amount'
-  
-  dateinformation <- setDT(dateinfo)[, date := as.IDate(date)][, .(mn_amt = round(mean(amount))), by = .(yr = year(date), mon = month(date))]
-  dateinformation <- transform(dateinformation, month = month.abb[mon])
-  dateinformation <- dateinformation[,c(3,4)]
-  dateinformation <- dateinformation[2:11,]
-  
+  # Plot trash by month
   output$datePlot <- renderPlot({
+<<<<<<< HEAD
   barplot(height=dateinformation$mn_amt,names.arg=dateinformation$month,
             col = 'thistle2', border = 'navajowhite3',    
+=======
+    tabledate = table(trash$dates)
+    dateinfo = as.data.frame(tabledate)
+    names(dateinfo)[1] = 'date'
+    names(dateinfo)[2] = 'amount'
+    
+    dateinformation <- setDT(dateinfo)[, date := as.IDate(date)][, .(mn_amt = round(mean(amount))), by = .(yr = year(date), mon = month(date))]
+    dateinformation <- transform(dateinformation, month = month.abb[mon])
+    dateinformation <- dateinformation[,c(3,4)]
+    dateinformation <- dateinformation[2:11,]
+    barplot(height=dateinformation$mn_amt,names.arg=dateinformation$month,
+            col = 'pink2', border = 'navajowhite3',    
+>>>>>>> 6430fd48ecad2012429fac2bee0901a2f40a0254
             main= paste("Trash by month"),
             ylab="Number of trash produced",
             xlab="months",
@@ -309,7 +232,7 @@ shinyServer(function(input, output, session) {
     click <- input$map_shape_click
     if(is.null(click))
       return()
-    map %>% clearGroup('circles') %>% clearGroup('placemarkers')
+    map %>% clearGroup('circles') %>% clearGroup('placemarkers') %>% clearPopups()
     shinyjs::hide("toggle-analysis")
     shinyjs::show("toggle-overview")
   })
@@ -319,6 +242,20 @@ shinyServer(function(input, output, session) {
     click <- event_data("plotly_click")
     if(is.null(click) || !is.data.frame(googleData))
       return()
+    map %>% 
+      clearPopups() %>% 
+      addPopups(
+        googleData[click$z, 2], googleData[click$z, 3], paste0(
+          '<hr/>',
+          '<h3 display: inline-block><img src="', googleData[click$z, 4], '" height=40, width=40" />', googleData[click$z, 1], '</h3>',
+          '<p><strong>Address:&nbsp </strong>', googleData[click$z, 5], '</p>',
+          '<p><strong>Phone:&nbsp </strong>', googleData[click$z, 6], '</p>',
+          '<p><strong>Website:&nbsp </strong><a href="', googleData[click$z, 7], '" target="blank">', googleData[click$z, 7], '</a></p>',
+          '<hr/>'
+        )
+      ) %>% 
+      setView(googleData[click$z, 2], googleData[click$z, 3], getViewport(isolate(input$distanceSlider)) + 1)
+    
     output$details <- renderUI({
       HTML(paste0(
         '<hr/>',
@@ -329,21 +266,6 @@ shinyServer(function(input, output, session) {
         '<hr/>'
       ))
     })
-    
-    map %>% addTiles() %>%
-      addPopups(
-        googleData[click$z, 2], googleData[click$z, 3], paste0(
-          '<hr/>',
-          '<h3 display: inline-block><img src="', googleData[click$z, 4], '" height=40, width=40" />', googleData[click$z, 1], '</h3>',
-          '<p><strong>Address:&nbsp </strong>', googleData[click$z, 5], '</p>',
-          '<p><strong>Phone:&nbsp </strong>', googleData[click$z, 6], '</p>',
-          '<p><strong>Website:&nbsp </strong><a href="', googleData[click$z, 7], '" target="blank">', googleData[click$z, 7], '</a></p>',
-          '<hr/>'
-        ) 
-      )
-    
-    map %>% 
-      setView(googleData[click$z, 2], googleData[click$z, 3], getViewport(isolate(input$distanceSlider)) + 1)
   })
   
   
@@ -360,11 +282,6 @@ shinyServer(function(input, output, session) {
     updateNavbarPage(session, "Trashtracking", "Map")
   })
   
-  # Button Explore
-  observeEvent(input$explore, {
-    updateNavbarPage(session, "Trashtracking", "Map")
-  })
-  
   # Reset actionbutton
   observeEvent(input$reset, {
     updateSliderInput(session, "distanceSlider", value=200)
@@ -375,7 +292,10 @@ shinyServer(function(input, output, session) {
     map %>% 
       setView(4.8999, 52.3724, 8) %>%  
       clearGroup('circles') %>%
-      clearGroup('placemarkers')
+      clearGroup('placemarkers') %>% 
+      clearPopups()
+    shinyjs::hide("toggle-analysis")
+    shinyjs::show("toggle-overview")
   })
   
   
