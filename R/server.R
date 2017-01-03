@@ -116,16 +116,13 @@ shinyServer(function(input, output, session) {
     ggplot(df, aes(x = brand)) + 
       geom_bar(aes(weight=n, fill = type), position = 'fill') + 
       scale_y_continuous("", breaks=NULL) + 
-      scale_fill_manual(values = rev(colorRampPalette(brewer.pal(4,"Reds"))(10))) + 
+      scale_fill_manual(values = rev(colorRampPalette(brewer.pal(8,"Set3"))(10))) + 
       coord_polar()
   })
   
   # Plot trash by month
   output$datePlot <- renderPlot({
-<<<<<<< HEAD
-  barplot(height=dateinformation$mn_amt,names.arg=dateinformation$month,
-            col = 'thistle2', border = 'navajowhite3',    
-=======
+  
     tabledate = table(trash$dates)
     dateinfo = as.data.frame(tabledate)
     names(dateinfo)[1] = 'date'
@@ -137,7 +134,6 @@ shinyServer(function(input, output, session) {
     dateinformation <- dateinformation[2:11,]
     barplot(height=dateinformation$mn_amt,names.arg=dateinformation$month,
             col = 'pink2', border = 'navajowhite3',    
->>>>>>> 6430fd48ecad2012429fac2bee0901a2f40a0254
             main= paste("Trash by month"),
             ylab="Number of trash produced",
             xlab="months",
