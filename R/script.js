@@ -5,13 +5,13 @@ $(document).ready(function(){
   
   $(window).load(function(){
     setTimeout(function() {
+      if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+        Shiny.onInputChange("mobile", "mobile");
+      }
       if (typeof(Storage) !== "undefined") {
         if (!localStorage.getItem("help")) {
           $('#myModal').modal('show');
           localStorage.setItem("help", true);
-        }
-        if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-          Shiny.onInputChange("mobile", T);
         }
       }
     }, 3000);
