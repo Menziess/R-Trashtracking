@@ -2,3 +2,4 @@
 .Rhistory
 *.Rhistory
 R/.Rproj.user/
+.Rproj.user

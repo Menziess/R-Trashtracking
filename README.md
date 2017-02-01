@@ -1,5 +1,15 @@
-# Trashtracking
+Trashtracking
+========
 
-The nonprofit organization, Plastic Soup Foundation, has collected data on litter using the trash hunters app. The Trashtracking shiny application was built to find patterns in this litter data.
+[![Latest NPM release][npm-badge]][npm-badge-url]
+[![License][license-badge]][license-badge-url]
 
-Please visit [Plastic Soup](http://www.plasticsoupfoundation.org/) for support.
+
+#### Shiny Application  ####
+
+The aim of the project is to enable data analysts to find patterns in litter data in a flexible R Application.
+
+### Usage ###
+
+Download the [RStudio](https://www.rstudio.com/products/rstudio/download/) and import the project.
+Run server.R by clicking Run App or typing "shiny::runApp(port=3838)" in the console.
