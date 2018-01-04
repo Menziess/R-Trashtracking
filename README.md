@@ -1,10 +1,6 @@
 Trashtracking
 ========
 
-[![Latest NPM release][npm-badge]][npm-badge-url]
-[![License][license-badge]][license-badge-url]
-
-
 #### Shiny Application  ####
 
 The aim of the project is to enable data analysts to find patterns in litter data in a flexible R Application.
